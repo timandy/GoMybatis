@@ -19,7 +19,7 @@
 ### 2 设置好GoPath,用go get 命令下载GoMybatis和对应的数据库驱动
 
 ```
-go get github.com/zhuxiujia/GoMybatis
+go get github.com/timandy/GoMybatis
 go get github.com/go-sql-driver/mysql
 ```
 

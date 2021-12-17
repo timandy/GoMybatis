@@ -1,7 +1,7 @@
 package engines
 
 import (
-	"github.com/zhuxiujia/GoMybatis/lib/github.com/zhuxiujia/GoFastExpress"
+	"github.com/timandy/GoMybatis/lib/github.com/timandy/GoFastExpress"
 	"strings"
 )
 

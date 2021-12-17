@@ -2,9 +2,9 @@ package GoMybatis
 
 import (
 	"fmt"
-	"github.com/zhuxiujia/GoMybatis/example"
-	"github.com/zhuxiujia/GoMybatis/stmt"
-	"github.com/zhuxiujia/GoMybatis/tx"
+	"github.com/timandy/GoMybatis/example"
+	"github.com/timandy/GoMybatis/stmt"
+	"github.com/timandy/GoMybatis/tx"
 	"testing"
 	"time"
 )
@@ -27,7 +27,7 @@ func getMapper() ExampleActivityMapper {
 func initMapper() {
 	bytes := []byte(`<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-        "https://raw.githubusercontent.com/zhuxiujia/GoMybatis/master/mybatis-3-mapper.dtd">
+        "https://raw.githubusercontent.com/timandy/GoMybatis/master/mybatis-3-mapper.dtd">
 <mapper>
     <!--logic_delete_key 逻辑删除字段-->
     <!--logic_deleted_value 逻辑删除已删除字段-->
@@ -254,7 +254,7 @@ func TestInit(t *testing.T) {
 func initMapperTest() {
 	bytes := []byte(`<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-        "https://raw.githubusercontent.com/zhuxiujia/GoMybatis/master/mybatis-3-mapper.dtd">
+        "https://raw.githubusercontent.com/timandy/GoMybatis/master/mybatis-3-mapper.dtd">
 <mapper>
     <!--logic_delete_key 逻辑删除字段-->
     <!--logic_deleted_value 逻辑删除已删除字段-->

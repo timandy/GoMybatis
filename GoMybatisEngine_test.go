@@ -3,10 +3,10 @@ package GoMybatis
 import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/zhuxiujia/GoMybatis/example"
-	"github.com/zhuxiujia/GoMybatis/stmt"
-	"github.com/zhuxiujia/GoMybatis/tx"
-	"github.com/zhuxiujia/GoMybatis/utils"
+	"github.com/timandy/GoMybatis/example"
+	"github.com/timandy/GoMybatis/stmt"
+	"github.com/timandy/GoMybatis/tx"
+	"github.com/timandy/GoMybatis/utils"
 	"sync"
 	"testing"
 	"time"
@@ -213,7 +213,7 @@ func InitMapperByLocalSession() ExampleActivityMapperImpl {
 
 	var bytes = []byte(`<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-        "https://raw.githubusercontent.com/zhuxiujia/GoMybatis/master/mybatis-3-mapper.dtd">
+        "https://raw.githubusercontent.com/timandy/GoMybatis/master/mybatis-3-mapper.dtd">
 <mapper>
     <resultMap id="BaseResultMap" type="example.Activity">
         <id column="id" langType="id"/>

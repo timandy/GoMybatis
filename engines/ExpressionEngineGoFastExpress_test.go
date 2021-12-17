@@ -1,7 +1,7 @@
 package engines
 
 import (
-	"github.com/zhuxiujia/GoMybatis/example"
+	"github.com/timandy/GoMybatis/example"
 	"testing"
 )
 

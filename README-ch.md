@@ -1,34 +1,34 @@
 # 更简单的xml/sql风格 功能丰富 值得一试的ORM库
 
-## [网站](https://zhuxiujia.github.io/gomybatis.io/#/)
+## [网站](https://timandy.github.io/gomybatis.io/#/)
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/zhuxiujia/GoMybatis)](https://goreportcard.com/report/github.com/zhuxiujia/GoMybatis)
-[![Build Status](https://travis-ci.com/zhuxiujia/GoMybatis.svg?branch=master)](https://travis-ci.com/zhuxiujia/GoMybatis)
-[![GoDoc](https://godoc.org/github.com/zhuxiujia/GoMybatis?status.svg)](https://godoc.org/github.com/zhuxiujia/GoMybatis)
-[![Coverage Status](https://coveralls.io/repos/github/zhuxiujia/GoMybatis/badge.svg?branch=master)](https://coveralls.io/github/zhuxiujia/GoMybatis?branch=master)
-[![codecov](https://codecov.io/gh/zhuxiujia/GoMybatis/branch/master/graph/badge.svg)](https://codecov.io/gh/zhuxiujia/GoMybatis)
+[![Go Report Card](https://goreportcard.com/badge/github.com/timandy/GoMybatis)](https://goreportcard.com/report/github.com/timandy/GoMybatis)
+[![Build Status](https://travis-ci.com/timandy/GoMybatis.svg?branch=master)](https://travis-ci.com/timandy/GoMybatis)
+[![GoDoc](https://godoc.org/github.com/timandy/GoMybatis?status.svg)](https://godoc.org/github.com/timandy/GoMybatis)
+[![Coverage Status](https://coveralls.io/repos/github/timandy/GoMybatis/badge.svg?branch=master)](https://coveralls.io/github/timandy/GoMybatis?branch=master)
+[![codecov](https://codecov.io/gh/timandy/GoMybatis/branch/master/graph/badge.svg)](https://codecov.io/gh/timandy/GoMybatis)
 
-![Image text](https://zhuxiujia.github.io/gomybatis.io/assets/vuetify.png)
+![Image text](https://timandy.github.io/gomybatis.io/assets/vuetify.png)
 
-### 实际应用[点击-GoMybatis商城](https://github.com/zhuxiujia/GoMybatisMall)
+### 实际应用[点击-GoMybatis商城](https://github.com/timandy/GoMybatisMall)
 
-### 请仔细阅读[网站](https://zhuxiujia.github.io/gomybatis.io/#/)
+### 请仔细阅读[网站](https://timandy.github.io/gomybatis.io/#/)
 
 # future
 
-* <a href="https://zhuxiujia.github.io/gomybatis.io/">稳定</a>，已应用生产环境App（电商/金融/卡充值类），功能稳定，适合各类 大小型项目以及复杂的金融项目,ERP项目 帮助您将数十万RMB轻松收入囊中<br>
-* <a href="https://zhuxiujia.github.io/gomybatis.io/">高性能</a>，单机最高可达751020 Qps/s,总耗时0.14s （测试环境返回模拟sql数据，并发1000，总数100000，6核16GB win10）<br>
-* <a href="https://zhuxiujia.github.io/gomybatis.io/">无痛迁移</a>，xml对于语言无关/低耦合，兼容大部分Java(Mybatis3,Mybatis Plus)框架逻辑，无痛苦Java Spring Mybatis的xml sql文件迁移至Go语言（仅修改resultMap的javaType为langType指定go语言类型）<br>
-* <a href="https://zhuxiujia.github.io/gomybatis.io/">声明式事务、AOP事务、事务传播行为</a>只需在函数尾部 定义`tx:"" rollback:"error"`即可启用声明式事务，事务传播行为,回滚策略.轻松应对复杂的事务嵌套/回滚<br>
-* <a href="https://zhuxiujia.github.io/gomybatis.io/">扩展日志接口</a>异步消息队列日,框架内sql日志使用带缓存的channel实现 消息队列异步记录日志<br>
-* <a href="https://zhuxiujia.github.io/gomybatis.io/">动态SQL</a>，在xml中`<select>,<update>,<insert>,<delete>,<trim>,<if>,<set>,<where>,<foreach>,<resultMap>,<bind>,<choose><when><otherwise>,<sql><include>`等等java框架Mybatis包含的15种实用功能<br>
-* <a href="https://zhuxiujia.github.io/gomybatis.io/">智能表达式</a>可处理动态判断、计算任务（例如：`#{foo.Bar}#{arg+1}#{arg*1}#{arg/1}#{arg-1}`）,例如写模糊查询`select * from table where phone like #{phone+'%'}`(注意后置百分号走索引)<br>
-* <a href="https://zhuxiujia.github.io/gomybatis.io/">动态数据源</a>可自定义多数据源，动态切换多个数据库实例<br>
-* <a href="https://zhuxiujia.github.io/gomybatis.io/">模板标签（新）</a>一行代码实现增删改查，逻辑删除，乐观锁，而且还保留完美的扩展性（标签体内可以继续扩展sql逻辑）<br>
-* <a href="https://zhuxiujia.github.io/gomybatis.io/">乐观锁（新）</a>`<updateTemplate>`乐观锁,尽可能防止并发竞争修改记录<br>
-* <a href="https://zhuxiujia.github.io/gomybatis.io/">逻辑删除（新）</a>`<insertTemplate><updateTemplate><deleteTemplate><selectTemplate>`逻辑删除,防止意外删除数据，数据恢复简单<br>
-* <a href="https://zhuxiujia.github.io/gomybatis.io/">RPC/MVC组件支持（新）</a>让服务完美支持RPC（减少参数限制）,动态代理，事务订阅，易于微服务集成和扩展 详情请点击链接https://github.com/zhuxiujia/easyrpc<br>
-* <a href="https://zhuxiujia.github.io/gomybatis.io/">Wrapper插件免写sql支持，Page分页插件支持（预计在golang1.17版本（支持泛型）之后出现）<br>
+* <a href="https://timandy.github.io/gomybatis.io/">稳定</a>，已应用生产环境App（电商/金融/卡充值类），功能稳定，适合各类 大小型项目以及复杂的金融项目,ERP项目 帮助您将数十万RMB轻松收入囊中<br>
+* <a href="https://timandy.github.io/gomybatis.io/">高性能</a>，单机最高可达751020 Qps/s,总耗时0.14s （测试环境返回模拟sql数据，并发1000，总数100000，6核16GB win10）<br>
+* <a href="https://timandy.github.io/gomybatis.io/">无痛迁移</a>，xml对于语言无关/低耦合，兼容大部分Java(Mybatis3,Mybatis Plus)框架逻辑，无痛苦Java Spring Mybatis的xml sql文件迁移至Go语言（仅修改resultMap的javaType为langType指定go语言类型）<br>
+* <a href="https://timandy.github.io/gomybatis.io/">声明式事务、AOP事务、事务传播行为</a>只需在函数尾部 定义`tx:"" rollback:"error"`即可启用声明式事务，事务传播行为,回滚策略.轻松应对复杂的事务嵌套/回滚<br>
+* <a href="https://timandy.github.io/gomybatis.io/">扩展日志接口</a>异步消息队列日,框架内sql日志使用带缓存的channel实现 消息队列异步记录日志<br>
+* <a href="https://timandy.github.io/gomybatis.io/">动态SQL</a>，在xml中`<select>,<update>,<insert>,<delete>,<trim>,<if>,<set>,<where>,<foreach>,<resultMap>,<bind>,<choose><when><otherwise>,<sql><include>`等等java框架Mybatis包含的15种实用功能<br>
+* <a href="https://timandy.github.io/gomybatis.io/">智能表达式</a>可处理动态判断、计算任务（例如：`#{foo.Bar}#{arg+1}#{arg*1}#{arg/1}#{arg-1}`）,例如写模糊查询`select * from table where phone like #{phone+'%'}`(注意后置百分号走索引)<br>
+* <a href="https://timandy.github.io/gomybatis.io/">动态数据源</a>可自定义多数据源，动态切换多个数据库实例<br>
+* <a href="https://timandy.github.io/gomybatis.io/">模板标签（新）</a>一行代码实现增删改查，逻辑删除，乐观锁，而且还保留完美的扩展性（标签体内可以继续扩展sql逻辑）<br>
+* <a href="https://timandy.github.io/gomybatis.io/">乐观锁（新）</a>`<updateTemplate>`乐观锁,尽可能防止并发竞争修改记录<br>
+* <a href="https://timandy.github.io/gomybatis.io/">逻辑删除（新）</a>`<insertTemplate><updateTemplate><deleteTemplate><selectTemplate>`逻辑删除,防止意外删除数据，数据恢复简单<br>
+* <a href="https://timandy.github.io/gomybatis.io/">RPC/MVC组件支持（新）</a>让服务完美支持RPC（减少参数限制）,动态代理，事务订阅，易于微服务集成和扩展 详情请点击链接https://github.com/timandy/easyrpc<br>
+* <a href="https://timandy.github.io/gomybatis.io/">Wrapper插件免写sql支持，Page分页插件支持（预计在golang1.17版本（支持泛型）之后出现）<br>
 
 ## 数据库驱动(支持所有基于标准库database/sql下的所有驱动)
 
@@ -47,12 +47,12 @@
 
 ## 使用教程
 
-> 教程源码  https://github.com/zhuxiujia/GoMybatis/tree/master/example
+> 教程源码  https://github.com/timandy/GoMybatis/tree/master/example
 
 * GoPath使用： go get 命令下载GoMybatis和对应的数据库驱动
 
 ``` bash
-go get github.com/zhuxiujia/GoMybatis
+go get github.com/timandy/GoMybatis
 ```
 
 ``` bash
@@ -71,7 +71,7 @@ go env -w GOSUMDB=off
 //go.mod加入依赖
 require (
 	github.com/go-sql-driver/mysql v1.5.0
-	github.com/zhuxiujia/GoMybatis v6.5.6+incompatible
+	github.com/timandy/GoMybatis v6.5.6+incompatible
 )
 ```
 
@@ -83,7 +83,7 @@ require (
 var xmlBytes = []byte(`
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-"https://raw.githubusercontent.com/zhuxiujia/GoMybatis/master/mybatis-3-mapper.dtd">
+"https://raw.githubusercontent.com/timandy/GoMybatis/master/mybatis-3-mapper.dtd">
 <mapper>
     <select id="SelectAll">
         select * from biz_activity where delete_flag=1 order by create_time desc
@@ -96,7 +96,7 @@ var xmlBytes = []byte(`
 import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql" //选择需要的数据库驱动导入
-	"github.com/zhuxiujia/GoMybatis"
+	"github.com/timandy/GoMybatis"
 )
 type ExampleActivityMapperImpl struct {
      SelectAll  func() ([]Activity, error)
@@ -128,7 +128,7 @@ func main() {
 ``` xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-        "https://raw.githubusercontent.com/zhuxiujia/GoMybatis/master/mybatis-3-mapper.dtd">
+        "https://raw.githubusercontent.com/timandy/GoMybatis/master/mybatis-3-mapper.dtd">
 <mapper>
     <!--logic_enable 逻辑删除字段-->
     <!--logic_deleted 逻辑删除已删除字段-->
@@ -220,7 +220,7 @@ type ExampleActivityMapper struct {
 
 ## 功能：异步日志接口（可自定义日志输出）
 
-![Image text](https://zhuxiujia.github.io/gomybatis.io/assets/log_system.png)
+![Image text](https://timandy.github.io/gomybatis.io/assets/log_system.png)
 
 ## 功能：嵌套事务传播处理器
 
@@ -303,7 +303,7 @@ go run XmlCreateTool.go
 ``` xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-        "https://raw.githubusercontent.com/zhuxiujia/GoMybatis/master/mybatis-3-mapper.dtd">
+        "https://raw.githubusercontent.com/timandy/GoMybatis/master/mybatis-3-mapper.dtd">
 <mapper>
     <!--logic_enable 逻辑删除字段-->
     <!--logic_deleted 逻辑删除已删除字段-->
@@ -323,11 +323,11 @@ go run XmlCreateTool.go
 </mapper>
 ```
 
-## 为了让您快速学习此框架，建议查看在实际项目中的应用 [点击-GoMybatis商城](https://github.com/zhuxiujia/GoMybatisMall)
+## 为了让您快速学习此框架，建议查看在实际项目中的应用 [点击-GoMybatis商城](https://github.com/timandy/GoMybatisMall)
 
 ## 建议使用的框架（已应用在生产环境）配合GoMybatis
 
-#### [easy_mvc](https://github.com/zhuxiujia/easy_mvc)
+#### [easy_mvc](https://github.com/timandy/easy_mvc)
 
 * 整体基于反射tag，所有配置（包括http方法，路径，参数，swagger文档参数）都集中于你定义的函数之后
 * 轻量 完全兼容标准库的http，意味着和标准库一般稳定，可以混合搭配使用，扩展性极高
@@ -341,21 +341,21 @@ go run XmlCreateTool.go
 * root path支持，类似spring controller定义一个基础的path加控制器具体方法的http path
 * 支持swagger ui 动态文档，免生成任何中间go文件 基于Tag和反射实现的swagger动态文档
 
-#### [easy_rpc](https://github.com/zhuxiujia/easyrpc)  （RPC框架，和GoMybatis配合更容易）
+#### [easy_rpc](https://github.com/timandy/easyrpc)  （RPC框架，和GoMybatis配合更容易）
 
 * 基于标准库rpc库修改而来,稳定,高性能,扩展性好
 * 标准库默认使用func (* Type)Method(arg,*result) error 的模式,EasyRpc 则把方法移动到结构体里（方便动态代理和Aop以及各种扩展和定制）
 * easyrpc同时支持 无参数，无返回值，或只有参数，只有返回值
 * 支持注册defer函数 easyrpc.RegisterDefer(v,deferFunc) ，防止服务因为不可预知 painc 问题导致程序退出。defer函数可处理问题然后把错误发送还给客户端
 
-#### [easyrpc_discovery](https://github.com/zhuxiujia/easyrpc_discovery)  服务发现
+#### [easyrpc_discovery](https://github.com/timandy/easyrpc_discovery)  服务发现
 
 * 自带负载均衡算法 随机 加权轮询 源地址哈希法
-* 基于easyrpc,类似标准库的api，定义服务没有标准库的要求那么严格（可选不传参数，或者只有一个参数，只有一个返回值） https://github.com/zhuxiujia/easyrpc
+* 基于easyrpc,类似标准库的api，定义服务没有标准库的要求那么严格（可选不传参数，或者只有一个参数，只有一个返回值） https://github.com/timandy/easyrpc
 * 基于easyrpc，负载均衡算法，失败重试，支持动态代理，支持GoMybatis事务，AOP代理，事务嵌套，tag定义事务
-  ![Image text](https://zhuxiujia.github.io/gomybatis.io/assets/easy_consul.png)
+  ![Image text](https://timandy.github.io/gomybatis.io/assets/easy_consul.png)
 
-## 为了让您快速学习此框架，建议查看在实际项目中的应用 [点击-GoMybatis商城](https://github.com/zhuxiujia/GoMybatisMall)
+## 为了让您快速学习此框架，建议查看在实际项目中的应用 [点击-GoMybatis商城](https://github.com/timandy/GoMybatisMall)
 
 ## 新特性规划
 
@@ -370,5 +370,5 @@ go run XmlCreateTool.go
 
 ## 欢迎右上角star 或捐赠赞助~
 
-![Image text](https://zhuxiujia.github.io/gomybatis.io/assets/wx_account.jpg)
+![Image text](https://timandy.github.io/gomybatis.io/assets/wx_account.jpg)
 

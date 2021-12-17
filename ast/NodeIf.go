@@ -1,8 +1,8 @@
 package ast
 
 import (
-	"github.com/zhuxiujia/GoMybatis/stmt"
-	"github.com/zhuxiujia/GoMybatis/utils"
+	"github.com/timandy/GoMybatis/stmt"
+	"github.com/timandy/GoMybatis/utils"
 )
 
 //判断节点

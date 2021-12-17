@@ -2,10 +2,10 @@ package GoMybatis
 
 import (
 	"bytes"
-	"github.com/zhuxiujia/GoMybatis/ast"
-	"github.com/zhuxiujia/GoMybatis/lib/github.com/beevik/etree"
-	"github.com/zhuxiujia/GoMybatis/stmt"
-	"github.com/zhuxiujia/GoMybatis/utils"
+	"github.com/timandy/GoMybatis/ast"
+	"github.com/timandy/GoMybatis/lib/github.com/beevik/etree"
+	"github.com/timandy/GoMybatis/stmt"
+	"github.com/timandy/GoMybatis/utils"
 	"log"
 	"reflect"
 	"strconv"

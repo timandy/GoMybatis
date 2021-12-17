@@ -1,6 +1,6 @@
 package ast
 
-import "github.com/zhuxiujia/GoMybatis/stmt"
+import "github.com/timandy/GoMybatis/stmt"
 
 type NodeOtherwise struct {
 	childs []Node

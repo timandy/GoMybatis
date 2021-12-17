@@ -2,7 +2,7 @@ package GoMybatis
 
 import (
 	"encoding/json"
-	"github.com/zhuxiujia/GoMybatis/utils"
+	"github.com/timandy/GoMybatis/utils"
 	"reflect"
 	"strings"
 )

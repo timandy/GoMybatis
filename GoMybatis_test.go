@@ -1,7 +1,7 @@
 package GoMybatis
 
 import (
-	"github.com/zhuxiujia/GoMybatis/example"
+	"github.com/timandy/GoMybatis/example"
 	"reflect"
 	"testing"
 	"time"

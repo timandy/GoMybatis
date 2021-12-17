@@ -1,6 +1,6 @@
 # 表达式执行引擎包
 
-## 引擎必须实现AST包 github.com/zhuxiujia/GoMybatis/ast 下 ast.ExpressionEngine
+## 引擎必须实现AST包 github.com/timandy/GoMybatis/ast 下 ast.ExpressionEngine
 
 ```
 type ExpressionEngine interface {

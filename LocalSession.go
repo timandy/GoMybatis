@@ -3,9 +3,9 @@ package GoMybatis
 import (
 	"database/sql"
 	"errors"
-	"github.com/zhuxiujia/GoMybatis/stmt"
-	"github.com/zhuxiujia/GoMybatis/tx"
-	"github.com/zhuxiujia/GoMybatis/utils"
+	"github.com/timandy/GoMybatis/stmt"
+	"github.com/timandy/GoMybatis/tx"
+	"github.com/timandy/GoMybatis/utils"
 	"strconv"
 )
 

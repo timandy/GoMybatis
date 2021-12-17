@@ -3,29 +3,29 @@
 * English
 * [中文](README-ch.md)
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/zhuxiujia/GoMybatis)](https://goreportcard.com/report/github.com/zhuxiujia/GoMybatis)
-[![Build Status](https://travis-ci.com/zhuxiujia/GoMybatis.svg?branch=master)](https://travis-ci.com/zhuxiujia/GoMybatis)
-[![GoDoc](https://godoc.org/github.com/zhuxiujia/GoMybatis?status.svg)](https://godoc.org/github.com/zhuxiujia/GoMybatis)
-[![Coverage Status](https://coveralls.io/repos/github/zhuxiujia/GoMybatis/badge.svg?branch=master)](https://coveralls.io/github/zhuxiujia/GoMybatis?branch=master)
-[![codecov](https://codecov.io/gh/zhuxiujia/GoMybatis/branch/master/graph/badge.svg)](https://codecov.io/gh/zhuxiujia/GoMybatis)
+[![Go Report Card](https://goreportcard.com/badge/github.com/timandy/GoMybatis)](https://goreportcard.com/report/github.com/timandy/GoMybatis)
+[![Build Status](https://travis-ci.com/timandy/GoMybatis.svg?branch=master)](https://travis-ci.com/timandy/GoMybatis)
+[![GoDoc](https://godoc.org/github.com/timandy/GoMybatis?status.svg)](https://godoc.org/github.com/timandy/GoMybatis)
+[![Coverage Status](https://coveralls.io/repos/github/timandy/GoMybatis/badge.svg?branch=master)](https://coveralls.io/github/timandy/GoMybatis?branch=master)
+[![codecov](https://codecov.io/gh/timandy/GoMybatis/branch/master/graph/badge.svg)](https://codecov.io/gh/timandy/GoMybatis)
 
-![Image text](https://zhuxiujia.github.io/gomybatis.io/assets/vuetify.png)
+![Image text](https://timandy.github.io/gomybatis.io/assets/vuetify.png)
 
-### Please read the documentation website carefully when using the tutorial. [DOC](https://zhuxiujia.github.io/gomybatis.io/#/)
+### Please read the documentation website carefully when using the tutorial. [DOC](https://timandy.github.io/gomybatis.io/#/)
 
 # Powerful Features
 
-* <a href="https://zhuxiujia.github.io/gomybatis.io/">High Performance</a>， can reach 751020 Qps/s, and the total time consumed is 0.14s (test environment returns simulated SQL data, concurrently 1000, total 100000, 6-core 16GB win10)<br>
-* <a href="https://zhuxiujia.github.io/gomybatis.io/">Painless migration from Java to go</a>，Compatible with most Java(Mybatis3,Mybatis Plus) ，Painless migration of XML SQL files from Java Spring Mybatis to Go language（Modify only the javaType of resultMap to specify go language type for langType）<br>
-* <a href="https://zhuxiujia.github.io/gomybatis.io/">Declarative transaction/AOP transaction/transaction Behavior</a>Only one line Tag is needed to define AOP transactions and transaction propagation behavior<br>
-* <a href="https://zhuxiujia.github.io/gomybatis.io/">Extensible Log Interface</a>Asynchronous message queue day, SQL log in framework uses cached channel to realize asynchronous message queue logging<br>
-* <a href="https://zhuxiujia.github.io/gomybatis.io/">dynamic sql</a>，contains 15 utilities Features`<select>,<update>,<insert>,<delete>,<trim>,<if>,<set>,<where>,<foreach>,<resultMap>,<bind>,<choose><when><otherwise>,<sql><include>`<br>
-* <a href="https://zhuxiujia.github.io/gomybatis.io/">Intelligent expression</a>Processing dynamic judgment and computation tasks（such as：`#{foo.Bar}#{arg+1}#{arg*1}#{arg/1}#{arg-1}`）,For example, write fuzzy queries `select * from table where phone like #{phone+'%'}`(Note the post-percentile query run in index)<br>
-* <a href="https://zhuxiujia.github.io/gomybatis.io/">Dynamic Data Source</a>Multiple data sources can be customized to dynamically switch multiple database instances<br>
-* <a href="https://zhuxiujia.github.io/gomybatis.io/">Template label（new）</a>One line of code to achieve add, delete, modify, delete logic, optimistic lock, but also retain perfect scalability (tag body can continue to expand SQL logic)<br>
-* <a href="https://zhuxiujia.github.io/gomybatis.io/">Optimistic Lock（new）</a>`<updateTemplate>`Optimistic locks to prevent concurrent competition to modify records as much as possible<br>
-* <a href="https://zhuxiujia.github.io/gomybatis.io/">Logical deletion（new）</a>`<insertTemplate><updateTemplate><deleteTemplate><selectTemplate>`Logical deletion, prevent accidental deletion of data, data recovery is simple<br>
-* <a href="https://zhuxiujia.github.io/gomybatis.io/">RPC/MVC Component Support（new）</a>To make the service perfect for RPC (reducing parameter restrictions), dynamic proxy, transaction subscription, easy integration and extension of micro services, click on the link https://github.com/zhuxiujia/easyrpc<br>
+* <a href="https://timandy.github.io/gomybatis.io/">High Performance</a>， can reach 751020 Qps/s, and the total time consumed is 0.14s (test environment returns simulated SQL data, concurrently 1000, total 100000, 6-core 16GB win10)<br>
+* <a href="https://timandy.github.io/gomybatis.io/">Painless migration from Java to go</a>，Compatible with most Java(Mybatis3,Mybatis Plus) ，Painless migration of XML SQL files from Java Spring Mybatis to Go language（Modify only the javaType of resultMap to specify go language type for langType）<br>
+* <a href="https://timandy.github.io/gomybatis.io/">Declarative transaction/AOP transaction/transaction Behavior</a>Only one line Tag is needed to define AOP transactions and transaction propagation behavior<br>
+* <a href="https://timandy.github.io/gomybatis.io/">Extensible Log Interface</a>Asynchronous message queue day, SQL log in framework uses cached channel to realize asynchronous message queue logging<br>
+* <a href="https://timandy.github.io/gomybatis.io/">dynamic sql</a>，contains 15 utilities Features`<select>,<update>,<insert>,<delete>,<trim>,<if>,<set>,<where>,<foreach>,<resultMap>,<bind>,<choose><when><otherwise>,<sql><include>`<br>
+* <a href="https://timandy.github.io/gomybatis.io/">Intelligent expression</a>Processing dynamic judgment and computation tasks（such as：`#{foo.Bar}#{arg+1}#{arg*1}#{arg/1}#{arg-1}`）,For example, write fuzzy queries `select * from table where phone like #{phone+'%'}`(Note the post-percentile query run in index)<br>
+* <a href="https://timandy.github.io/gomybatis.io/">Dynamic Data Source</a>Multiple data sources can be customized to dynamically switch multiple database instances<br>
+* <a href="https://timandy.github.io/gomybatis.io/">Template label（new）</a>One line of code to achieve add, delete, modify, delete logic, optimistic lock, but also retain perfect scalability (tag body can continue to expand SQL logic)<br>
+* <a href="https://timandy.github.io/gomybatis.io/">Optimistic Lock（new）</a>`<updateTemplate>`Optimistic locks to prevent concurrent competition to modify records as much as possible<br>
+* <a href="https://timandy.github.io/gomybatis.io/">Logical deletion（new）</a>`<insertTemplate><updateTemplate><deleteTemplate><selectTemplate>`Logical deletion, prevent accidental deletion of data, data recovery is simple<br>
+* <a href="https://timandy.github.io/gomybatis.io/">RPC/MVC Component Support（new）</a>To make the service perfect for RPC (reducing parameter restrictions), dynamic proxy, transaction subscription, easy integration and extension of micro services, click on the link https://github.com/timandy/easyrpc<br>
 
 ## Database Driver support(support all database of database/sql)
 
@@ -44,12 +44,12 @@
 
 ## Use tutorials
 
-> Tutorial source code  https://github.com/zhuxiujia/GoMybatis/tree/master/example
+> Tutorial source code  https://github.com/timandy/GoMybatis/tree/master/example
 
 * GoPath use, download GoMybatis and the corresponding database driver with the go get command
 
 ``` bash
-go get github.com/zhuxiujia/GoMybatis
+go get github.com/timandy/GoMybatis
 go get github.com/go-sql-driver/mysql
 ```
 
@@ -59,7 +59,7 @@ go get github.com/go-sql-driver/mysql
 //go.mod加入依赖
 require (
 	github.com/go-sql-driver/mysql v1.5.0
-	github.com/zhuxiujia/GoMybatis v6.5.6+incompatible
+	github.com/timandy/GoMybatis v6.5.6+incompatible
 )
 ```
 
@@ -71,7 +71,7 @@ In practice, we use mapper to define the content of xml. It is suggested that th
 var xmlBytes = []byte(`
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-"https://raw.githubusercontent.com/zhuxiujia/GoMybatis/master/mybatis-3-mapper.dtd">
+"https://raw.githubusercontent.com/timandy/GoMybatis/master/mybatis-3-mapper.dtd">
 <mapper>
     <select id="SelectAll">
         select * from biz_activity where delete_flag=1 order by create_time desc
@@ -84,7 +84,7 @@ var xmlBytes = []byte(`
 import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql" //Select the required database-driven imports
-	"github.com/zhuxiujia/GoMybatis"
+	"github.com/timandy/GoMybatis"
 )
 type ExampleActivityMapperImpl struct {
      SelectAll  func() ([]Activity, error)
@@ -116,7 +116,7 @@ func main() {
 ``` xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-        "https://raw.githubusercontent.com/zhuxiujia/GoMybatis/master/mybatis-3-mapper.dtd">
+        "https://raw.githubusercontent.com/timandy/GoMybatis/master/mybatis-3-mapper.dtd">
 <mapper>
     <!--logic_enable -->
     <!--logic_deleted -->
@@ -206,7 +206,7 @@ type ExampleActivityMapper struct {
 
 ## Features：Asynchronous log interface (customizable log output)
 
-![Image text](https://zhuxiujia.github.io/gomybatis.io/assets/log_system.png)
+![Image text](https://timandy.github.io/gomybatis.io/assets/log_system.png)
 
 ## Features：Transaction Propagation Processor (Nested Transactions)
 
@@ -289,7 +289,7 @@ go run XmlCreateTool.go
 ``` xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-        "https://raw.githubusercontent.com/zhuxiujia/GoMybatis/master/mybatis-3-mapper.dtd">
+        "https://raw.githubusercontent.com/timandy/GoMybatis/master/mybatis-3-mapper.dtd">
 <mapper>
     <!--logic_enable Logical Delete Fields-->
     <!--logic_deleted Logically delete deleted fields-->
@@ -311,13 +311,13 @@ go run XmlCreateTool.go
 
 ## Components (RPC, JSONRPC, Consul) - With GoMybatis
 
-* https://github.com/zhuxiujia/easy_mvc //mvc
-* https://github.com/zhuxiujia/easyrpc  //easyrpc
-* https://github.com/zhuxiujia/easyrpc_discovery  //easyrpc discovery
-  ![Image text](https://zhuxiujia.github.io/gomybatis.io/assets/easy_consul.png)
+* https://github.com/timandy/easy_mvc //mvc
+* https://github.com/timandy/easyrpc  //easyrpc
+* https://github.com/timandy/easyrpc_discovery  //easyrpc discovery
+  ![Image text](https://timandy.github.io/gomybatis.io/assets/easy_consul.png)
 
 ## Please pay attention to the version in time, upgrade the version in time (new features, bug fix). For projects using GoMybatis, please leave your project name + contact information in Issues.
 
 ## Welcome to Star or Wechat Payment Sponsorship at the top right corner~
 
-![Image text](https://zhuxiujia.github.io/gomybatis.io/assets/wx_account.jpg)
+![Image text](https://timandy.github.io/gomybatis.io/assets/wx_account.jpg)
