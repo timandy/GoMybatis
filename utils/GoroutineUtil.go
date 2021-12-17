@@ -7,10 +7,9 @@ import (
 )
 
 func GoroutineID() int64 {
-//	return goroutineid.GetGoID()
-    return GetGID()
+	//	return goroutineid.GetGoID()
+	return GetGID()
 }
-
 
 func GetGID() int64 {
 	b := make([]byte, 64)

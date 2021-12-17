@@ -7,10 +7,10 @@ func (it *MysqlStmtIndexConvertImpl) Convert() string {
 	return " ? "
 }
 
-func (it *MysqlStmtIndexConvertImpl)Inc()  {
-	
+func (it *MysqlStmtIndexConvertImpl) Inc() {
+
 }
 
-func (it *MysqlStmtIndexConvertImpl)Get()int  {
+func (it *MysqlStmtIndexConvertImpl) Get() int {
 	return 0
 }

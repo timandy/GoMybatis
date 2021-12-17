@@ -7,5 +7,5 @@ package stmt
 type StmtIndexConvert interface {
 	Convert() string
 	Inc()
-	Get()int
+	Get() int
 }

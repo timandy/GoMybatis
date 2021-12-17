@@ -78,8 +78,8 @@
         <!ELEMENT insert (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>
         <!ATTLIST insert
                 id CDATA #REQUIRED
-               
-                
+
+
                 useGeneratedKeys (true|false) #IMPLIED
                 lang CDATA #IMPLIED
                 >
@@ -141,7 +141,7 @@
         <!ATTLIST sql
                 id CDATA #REQUIRED
                 lang CDATA #IMPLIED
-                
+
                 >
 
         <!ELEMENT trim (#PCDATA | include | trim | where | set | foreach | choose | if | bind)*>

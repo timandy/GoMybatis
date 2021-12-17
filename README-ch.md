@@ -2,13 +2,11 @@
 
 ## [网站](https://zhuxiujia.github.io/gomybatis.io/#/)
 
-
 [![Go Report Card](https://goreportcard.com/badge/github.com/zhuxiujia/GoMybatis)](https://goreportcard.com/report/github.com/zhuxiujia/GoMybatis)
 [![Build Status](https://travis-ci.com/zhuxiujia/GoMybatis.svg?branch=master)](https://travis-ci.com/zhuxiujia/GoMybatis)
 [![GoDoc](https://godoc.org/github.com/zhuxiujia/GoMybatis?status.svg)](https://godoc.org/github.com/zhuxiujia/GoMybatis)
 [![Coverage Status](https://coveralls.io/repos/github/zhuxiujia/GoMybatis/badge.svg?branch=master)](https://coveralls.io/github/zhuxiujia/GoMybatis?branch=master)
 [![codecov](https://codecov.io/gh/zhuxiujia/GoMybatis/branch/master/graph/badge.svg)](https://codecov.io/gh/zhuxiujia/GoMybatis)
-
 
 ![Image text](https://zhuxiujia.github.io/gomybatis.io/assets/vuetify.png)
 
@@ -16,9 +14,8 @@
 
 ### 请仔细阅读[网站](https://zhuxiujia.github.io/gomybatis.io/#/)
 
-
-
 # future
+
 * <a href="https://zhuxiujia.github.io/gomybatis.io/">稳定</a>，已应用生产环境App（电商/金融/卡充值类），功能稳定，适合各类 大小型项目以及复杂的金融项目,ERP项目 帮助您将数十万RMB轻松收入囊中<br>
 * <a href="https://zhuxiujia.github.io/gomybatis.io/">高性能</a>，单机最高可达751020 Qps/s,总耗时0.14s （测试环境返回模拟sql数据，并发1000，总数100000，6核16GB win10）<br>
 * <a href="https://zhuxiujia.github.io/gomybatis.io/">无痛迁移</a>，xml对于语言无关/低耦合，兼容大部分Java(Mybatis3,Mybatis Plus)框架逻辑，无痛苦Java Spring Mybatis的xml sql文件迁移至Go语言（仅修改resultMap的javaType为langType指定go语言类型）<br>
@@ -34,6 +31,7 @@
 * <a href="https://zhuxiujia.github.io/gomybatis.io/">Wrapper插件免写sql支持，Page分页插件支持（预计在golang1.17版本（支持泛型）之后出现）<br>
 
 ## 数据库驱动(支持所有基于标准库database/sql下的所有驱动)
+
 ``` bash
  //传统数据库
  Mysql:                             github.com/go-sql-driver/mysql
@@ -46,23 +44,29 @@
  Tidb:                              github.com/go-sql-driver/mysql
  CockroachDB:                       github.com/lib/pq
  ```
- 
+
 ## 使用教程
+
 > 教程源码  https://github.com/zhuxiujia/GoMybatis/tree/master/example
 
 * GoPath使用： go get 命令下载GoMybatis和对应的数据库驱动
+
 ``` bash
 go get github.com/zhuxiujia/GoMybatis
 ```
+
 ``` bash
 //驱动
 go get github.com/go-sql-driver/mysql
 ```
+
 * mod使用（环境变量加入GO111MODULE auto）:
+
 ``` bash
 //命令行执行 禁止gosumdb
 go env -w GOSUMDB=off
 ```
+
 ``` bash
 //go.mod加入依赖
 require (
@@ -71,10 +75,10 @@ require (
 )
 ```
 
-
-
 实际使用mapper 定义xml内容，建议以*Mapper.xml文件存于项目目录中,在编辑xml时就可享受GoLand等IDE渲染和智能提示。生产环境可以使用statikFS把xml文件打包进程序里</br>
+
 * main.go
+
 ``` xml
 var xmlBytes = []byte(`
 <?xml version="1.0" encoding="UTF-8"?>
@@ -87,6 +91,7 @@ var xmlBytes = []byte(`
 </mapper>
 `)
 ```
+
 ``` go
 import (
 	"fmt"
@@ -117,7 +122,9 @@ func main() {
 	fmt.Println(result)
 }
 ```
+
 ## 功能：模板标签CRUD 简化（依赖resultMap，同时带有 乐观锁.逻辑删除）
+
 ``` xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
@@ -156,8 +163,9 @@ func main() {
     <deleteTemplate wheres="name?name = #{name}"/>
 </mapper>    
 ```
-xml对应以下定义的Mapper结构体方法,然后将生成对应的SQL语句
-旧版本使用mapperParams的tag，单词太长容易拼错，新版改为args
+
+xml对应以下定义的Mapper结构体方法,然后将生成对应的SQL语句 旧版本使用mapperParams的tag，单词太长容易拼错，新版改为args
+
 ```go
 type Activity struct {
 	Id         string    `json:"id"`
@@ -182,6 +190,7 @@ type ExampleActivityMapper struct {
 ```
 
 ## 功能：动态数据源
+
 ``` go
         //添加第二个mysql数据库,请把MysqlUri改成你的第二个数据源链接
     var engine = GoMybatis.GoMybatisEngine{}.New()
@@ -197,7 +206,9 @@ type ExampleActivityMapper struct {
 	})
 	engine.SetDataSourceRouter(&router)
 ```
+
 ## 功能：自定义日志输出
+
 ``` go
 	engine.SetLogEnable(true)
 	engine.SetLog(&GoMybatis.LogStandard{
@@ -206,10 +217,13 @@ type ExampleActivityMapper struct {
 		},
 	})
 ```
+
 ## 功能：异步日志接口（可自定义日志输出）
+
 ![Image text](https://zhuxiujia.github.io/gomybatis.io/assets/log_system.png)
 
- ## 功能：嵌套事务传播处理器
+## 功能：嵌套事务传播处理器
+
  <table>
  <thead>
  <tr><th>事务类型</th>
@@ -225,7 +239,7 @@ type ExampleActivityMapper struct {
  <tr><td>PROPAGATION_NESTED</td><td>表示如果当前事务存在，则在嵌套事务内执行，如嵌套事务回滚，则只会在嵌套事务内回滚，不会影响当前事务。如果当前没有事务，则进行与PROPAGATION_REQUIRED类似的操作。</td></tr>
  <tr><td>PROPAGATION_NOT_REQUIRED</td><td>表示如果当前没有事务，就新建一个事务,否则返回错误。</td></tr></tbody>
  </table>
- 
+
  ``` go
  //嵌套事务的服务
 type TestService struct {
@@ -251,12 +265,9 @@ func main()  {
 	testService.UpdateRemark("1","remark")
 }
 ```
- 
- 
- 
- 
- 
-  ## 功能：XML/Mapper生成器- 根据struct结构体生成*mapper.xml
+
+## 功能：XML/Mapper生成器- 根据struct结构体生成*mapper.xml
+
 ``` go
   //step1 定义你的数据库模型,必须包含 json注解（默认为数据库字段）, gm:""注解指定 值是否为 id,version乐观锁,logic逻辑软删除
   type UserAddress struct {
@@ -271,18 +282,24 @@ func main()  {
 	DeleteFlag int       `json:"delete_flag" gm:"logic"`
 }
 ```
+
 * 第二步，在你项目main 目录下建立一个 XmlCreateTool.go 内容如下
+
 ``` go
 func main() {
 	var bean = UserAddress{} //此处只是举例，应该替换为你自己的数据库模型
 	GoMybatis.OutPutXml(reflect.TypeOf(bean).Name()+"Mapper.xml", GoMybatis.CreateXml("biz_"+GoMybatis.StructToSnakeString(bean), bean))
 }
 ```
+
 * 第三步，执行命令，在当前目录下得到 UserAddressMapper.xml文件
+
 ``` go
 go run XmlCreateTool.go
 ```
+
 * 以下是自动生成的xml文件内容
+
 ``` xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
@@ -305,13 +322,13 @@ go run XmlCreateTool.go
     </resultMap>
 </mapper>
 ```
- 
- 
-## 为了让您快速学习此框架，建议查看在实际项目中的应用 [点击-GoMybatis商城](https://github.com/zhuxiujia/GoMybatisMall) 
- 
- 
+
+## 为了让您快速学习此框架，建议查看在实际项目中的应用 [点击-GoMybatis商城](https://github.com/zhuxiujia/GoMybatisMall)
+
 ## 建议使用的框架（已应用在生产环境）配合GoMybatis
-#### [easy_mvc](https://github.com/zhuxiujia/easy_mvc) 
+
+#### [easy_mvc](https://github.com/zhuxiujia/easy_mvc)
+
 * 整体基于反射tag，所有配置（包括http方法，路径，参数，swagger文档参数）都集中于你定义的函数之后
 * 轻量 完全兼容标准库的http，意味着和标准库一般稳定，可以混合搭配使用，扩展性极高
 * 拦截器 支持（例如非常方便的检查用户登录，提取用户登录数据，支持JWT token，Oath2Token更加方便的接入）
@@ -323,33 +340,35 @@ go run XmlCreateTool.go
 * 指针参数可为空（nil）非指针参数 如果没有值框架会拦截
 * root path支持，类似spring controller定义一个基础的path加控制器具体方法的http path
 * 支持swagger ui 动态文档，免生成任何中间go文件 基于Tag和反射实现的swagger动态文档
+
 #### [easy_rpc](https://github.com/zhuxiujia/easyrpc)  （RPC框架，和GoMybatis配合更容易）
+
 * 基于标准库rpc库修改而来,稳定,高性能,扩展性好
 * 标准库默认使用func (* Type)Method(arg,*result) error 的模式,EasyRpc 则把方法移动到结构体里（方便动态代理和Aop以及各种扩展和定制）
 * easyrpc同时支持 无参数，无返回值，或只有参数，只有返回值
-* 支持注册defer函数  easyrpc.RegisterDefer(v,deferFunc) ，防止服务因为不可预知 painc 问题导致程序退出。defer函数可处理问题然后把错误发送还给客户端
+* 支持注册defer函数 easyrpc.RegisterDefer(v,deferFunc) ，防止服务因为不可预知 painc 问题导致程序退出。defer函数可处理问题然后把错误发送还给客户端
+
 #### [easyrpc_discovery](https://github.com/zhuxiujia/easyrpc_discovery)  服务发现
+
 * 自带负载均衡算法 随机 加权轮询 源地址哈希法
 * 基于easyrpc,类似标准库的api，定义服务没有标准库的要求那么严格（可选不传参数，或者只有一个参数，只有一个返回值） https://github.com/zhuxiujia/easyrpc
 * 基于easyrpc，负载均衡算法，失败重试，支持动态代理，支持GoMybatis事务，AOP代理，事务嵌套，tag定义事务
-![Image text](https://zhuxiujia.github.io/gomybatis.io/assets/easy_consul.png)
+  ![Image text](https://zhuxiujia.github.io/gomybatis.io/assets/easy_consul.png)
 
-
-
-
-## 为了让您快速学习此框架，建议查看在实际项目中的应用 [点击-GoMybatis商城](https://github.com/zhuxiujia/GoMybatisMall) 
-
-
+## 为了让您快速学习此框架，建议查看在实际项目中的应用 [点击-GoMybatis商城](https://github.com/zhuxiujia/GoMybatisMall)
 
 ## 新特性规划
+
 * 内置方法explain目录下所有sql，获取每条sql是否走索引.避免上线后因为sql扫全表导致卡顿和死锁悲剧
 * 新项目 https://github.com/rbatis/rbatis 提供高性能，无GC,无并发安全问题，内存安全的rust语言 orm框架
 
-## 请及时关注版本，尽可能使用最新版本(稳定，修复bug) 
+## 请及时关注版本，尽可能使用最新版本(稳定，修复bug)
+
 * 不管是商业用途还是个人使用GoMybatis项目，必须在Issues里留言您的项目名称+联系方式 ！
 
 ## 联系方式：微信号 zxj347284221
 
 ## 欢迎右上角star 或捐赠赞助~
+
 ![Image text](https://zhuxiujia.github.io/gomybatis.io/assets/wx_account.jpg)
 

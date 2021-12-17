@@ -319,7 +319,7 @@ func isOperatorsAction(arg string) bool {
 		arg == Reduce ||
 		arg == Ride ||
 		arg == Divide ||
-	//比较操作符
+		//比较操作符
 		arg == And ||
 		arg == Or ||
 		arg == Equal ||

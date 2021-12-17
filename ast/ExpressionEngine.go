@@ -15,6 +15,5 @@ type ExpressionEngine interface {
 	//返回：执行结果，错误
 	Eval(lexerResult interface{}, arg interface{}, operation int) (interface{}, error)
 
-
-	LexerAndEval(lexerArg string,arg interface{})  (interface{}, error)
+	LexerAndEval(lexerArg string, arg interface{}) (interface{}, error)
 }

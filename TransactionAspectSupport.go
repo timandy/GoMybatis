@@ -60,7 +60,7 @@ func AopProxyServiceValue(service reflect.Value, engine SessionEngine) {
 				if err != nil {
 					panic(err)
 				}
-			}else{
+			} else {
 				var err = session.Begin(&propagation)
 				if err != nil {
 					panic(err)
