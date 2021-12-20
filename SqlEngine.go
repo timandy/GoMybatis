@@ -100,4 +100,8 @@ type SessionEngine interface {
 	LogSystem() *LogSystem
 
 	IsPrintWarning() bool
+
+	SetPanicOnError(value bool)
+
+	IsPanicOnError() bool
 }

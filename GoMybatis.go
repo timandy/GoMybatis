@@ -101,6 +101,9 @@ func WriteMapper(bean reflect.Value, xml []byte, sessionEngine SessionEngine) {
 				var session = sessionEngine.SessionFactory().NewSession(beanName, SessionType_Default)
 				var err error
 				returnValue.Elem().Set(reflect.ValueOf(session).Elem().Addr().Convert(*returnType.ReturnOutType))
+				if err != nil && sessionEngine.IsPanicOnError() {
+					panic(err)
+				}
 				return buildReturnValues(returnType, returnValue, err)
 			}
 			return proxyFunc
@@ -120,6 +123,9 @@ func WriteMapper(bean reflect.Value, xml []byte, sessionEngine SessionEngine) {
 				}
 				//exe sql
 				var e = exeMethodByXml(mapper.xml.Tag, beanName, sessionEngine, arg, mapper.nodes, resultMap, returnValue)
+				if e != nil && sessionEngine.IsPanicOnError() {
+					panic(e)
+				}
 				return buildReturnValues(returnType, returnValue, e)
 			}
 			return proxyFunc
