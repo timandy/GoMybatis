@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/timandy/GoMybatis/v7/stmt"
+	"reflect"
 	"strings"
 )
 
@@ -14,9 +15,7 @@ func Replace(findStrs []string, data string, arg map[string]interface{}, engine 
 
 		//find param arg
 		var argValue = arg[findStr]
-		if argValue != nil {
-			*arg_array = append(*arg_array, argValue)
-		} else {
+		if argValue == nil {
 			//exec lexer
 			var err error
 			evalData, err := engine.LexerAndEval(findStr, arg)
@@ -24,6 +23,17 @@ func Replace(findStrs []string, data string, arg map[string]interface{}, engine 
 				return "", errors.New(engine.Name() + ":" + err.Error())
 			}
 			*arg_array = append(*arg_array, evalData)
+		} else if reflect.ValueOf(argValue).Kind() == reflect.Slice {
+			configHolder := &NodeConfigHolder{Proxy: engine}
+			childNode := &NodeString{value: "#{item}", t: NString, expressMap: []string{"item"}, holder: configHolder}
+			foreachNode := &NodeForEach{childs: []Node{childNode}, t: NForEach, collection: findStr, open: "(", separator: ",", close: ")", item: "item", holder: configHolder}
+			b, err := foreachNode.Eval(arg, arg_array, indexConvert)
+			if err != nil {
+				return "", err
+			}
+			data = strings.Replace(data, "#{"+findStr+"}", string(b), -1)
+		} else {
+			*arg_array = append(*arg_array, argValue)
 		}
 		//replace index
 		indexConvert.Inc()
