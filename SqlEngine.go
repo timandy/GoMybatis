@@ -101,7 +101,15 @@ type SessionEngine interface {
 
 	IsPrintWarning() bool
 
+	// SetPanicOnError 设置执行SQL失败时是否panic
 	SetPanicOnError(value bool)
 
+	// IsPanicOnError 获取执行SQL失败时是否panic
 	IsPanicOnError() bool
+
+	// SetWriteBackAutoField 设置 insert() 时是否写回自增列
+	SetWriteBackAutoField(value bool)
+
+	// IsWriteBackAutoFiled 获取 insert() 时是否写回自增列
+	IsWriteBackAutoFiled() bool
 }

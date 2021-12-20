@@ -7,6 +7,7 @@ import (
 type ReturnType struct {
 	ErrorType     *reflect.Type
 	ReturnOutType *reflect.Type
-	ReturnIndex   int //返回数据位置索引
-	NumOut        int //返回总数
+	AutoFiledName string //自增字段名 type:"auto"
+	ReturnIndex   int    //返回数据位置索引
+	NumOut        int    //返回总数
 }

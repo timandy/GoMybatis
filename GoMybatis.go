@@ -122,15 +122,38 @@ func WriteMapper(bean reflect.Value, xml []byte, sessionEngine SessionEngine) {
 					returnValue = &returnV
 				}
 				//exe sql
-				var e = exeMethodByXml(mapper.xml.Tag, beanName, sessionEngine, arg, mapper.nodes, resultMap, returnValue)
-				if e != nil && sessionEngine.IsPanicOnError() {
-					panic(e)
+				autoFieldValue, err := exeMethodByXml(mapper.xml.Tag, beanName, sessionEngine, arg, mapper.nodes, resultMap, returnValue)
+				if err != nil && sessionEngine.IsPanicOnError() {
+					panic(err)
 				}
-				return buildReturnValues(returnType, returnValue, e)
+				if sessionEngine.IsWriteBackAutoFiled() {
+					writeBackAutoField(arg.Args[0], returnType.AutoFiledName, autoFieldValue)
+				}
+				return buildReturnValues(returnType, returnValue, err)
 			}
 			return proxyFunc
 		}
 	})
+}
+
+func writeBackAutoField(arg reflect.Value, fieldName string, fieldValue int64) {
+	if fieldValue == -1 || len(fieldName) == 0 {
+		return
+	}
+
+	value := arg
+	if value.Kind() == reflect.Ptr {
+		if value.IsNil() {
+			return
+		}
+		value = arg.Elem()
+	}
+
+	if value.Kind() != reflect.Struct {
+		return
+	}
+
+	value.FieldByName(fieldName).SetInt(fieldValue)
 }
 
 func mapperCheck(arg map[string]*Mapper) {
@@ -245,6 +268,29 @@ func makeReturnTypeMap(value reflect.Type) (returnMap map[string]*ReturnType) {
 				returnMap[funcName].ErrorType = &outType
 			}
 		}
+
+		if funcType.NumIn() == 1 && isCustomStruct(funcType.In(0)) {
+			var returnType = returnMap[funcName]
+			if returnType == nil {
+				returnMap[funcName] = &ReturnType{
+					ReturnIndex: -1,
+					NumOut:      numOut,
+				}
+			}
+			inType := funcType.In(0)
+			if inType.Kind() == reflect.Ptr {
+				inType = inType.Elem()
+			}
+			if inType.Kind() == reflect.Struct {
+				for i := 0; i < inType.NumField(); i++ {
+					structField := inType.Field(i)
+					if structField.Tag.Get("type") == "auto" {
+						returnMap[funcName].AutoFiledName = structField.Name
+						break
+					}
+				}
+			}
+		}
 	}
 	return returnMap
 }
@@ -339,15 +385,10 @@ func findMapperXml(mapperTree map[string]etree.Token, methodName string) *etree.
 	return nil
 }
 
-func exeMethodByXml(elementType ElementType, beanName string, sessionEngine SessionEngine, proxyArg ProxyArg, nodes []ast.Node, resultMap map[string]*ResultProperty, returnValue *reflect.Value) error {
-	//TODO　CallBack and Session must Location in build step!
-	var session Session
-	var sql string
-	var err error
-	//session
-	session, err = findArgSession(proxyArg)
+func exeMethodByXml(elementType ElementType, beanName string, sessionEngine SessionEngine, proxyArg ProxyArg, nodes []ast.Node, resultMap map[string]*ResultProperty, returnValue *reflect.Value) (int64, error) {
+	session, err := findArgSession(proxyArg)
 	if err != nil {
-		return err
+		return -1, err
 	}
 	if session == nil {
 		var goroutineID int64 //协程id
@@ -359,24 +400,24 @@ func exeMethodByXml(elementType ElementType, beanName string, sessionEngine Sess
 		session = sessionEngine.GoroutineSessionMap().Get(goroutineID)
 	}
 	if session == nil {
-		var s, err = sessionEngine.NewSession(beanName)
+		s, err := sessionEngine.NewSession(beanName)
 		if err != nil {
-			return err
+			return -1, err
 		}
 		session = s
 		defer session.Close()
 	}
 	convert, err := session.StmtConvert()
 	if err != nil {
-		return err
+		return -1, err
 	}
-	var array_arg = []interface{}{}
-	sql, err = buildSql(proxyArg, nodes, sessionEngine.SqlBuilder(), &array_arg, convert)
+	array_arg := []interface{}{}
+	sql, err := buildSql(proxyArg, nodes, sessionEngine.SqlBuilder(), &array_arg, convert)
 	if err != nil {
-		return err
+		return -1, err
 	}
 	//do CRUD
-	var haveLastReturnValue = returnValue != nil && (*returnValue).IsNil() == false
+	haveLastReturnValue := returnValue != nil && (*returnValue).IsNil() == false
 	if elementType == Element_Select && haveLastReturnValue {
 		//is select and have return value
 		if sessionEngine.LogEnable() {
@@ -397,39 +438,39 @@ func exeMethodByXml(elementType ElementType, beanName string, sessionEngine Sess
 			}
 		}()
 		if err != nil {
-			return err
+			return -1, err
 		}
-		err = sessionEngine.SqlResultDecoder().Decode(resultMap, res, returnValue.Interface())
-		if err != nil {
-			return err
-		}
-	} else {
-		if sessionEngine.LogEnable() {
-			sessionEngine.LogSystem().SendLog("[GoMybatis] [", session.Id(), "] Exec ==> "+sql)
-			sessionEngine.LogSystem().SendLog("[GoMybatis] [", session.Id(), "] Args ==> "+utils.SprintArray(array_arg))
-		}
-		var res, err = session.ExecPrepare(sql, array_arg...)
-		defer func() {
-			if sessionEngine.LogEnable() {
-				var RowsAffected = "0"
-				if err == nil && res != nil {
-					RowsAffected = strconv.FormatInt(res.RowsAffected, 10)
-				}
-				sessionEngine.LogSystem().SendLog("[GoMybatis] [", session.Id(), "] RowsAffected <== "+RowsAffected)
-				if err != nil {
-					sessionEngine.LogSystem().SendLog("[GoMybatis] [", session.Id(), "] error == "+err.Error())
-				}
-			}
-		}()
 
-		if err != nil {
-			return err
+		if err := sessionEngine.SqlResultDecoder().Decode(resultMap, res, returnValue.Interface()); err != nil {
+			return -1, err
 		}
-		if haveLastReturnValue {
-			returnValue.Elem().SetInt(res.RowsAffected)
-		}
+		return -1, err
 	}
-	return nil
+	if sessionEngine.LogEnable() {
+		sessionEngine.LogSystem().SendLog("[GoMybatis] [", session.Id(), "] Exec ==> "+sql)
+		sessionEngine.LogSystem().SendLog("[GoMybatis] [", session.Id(), "] Args ==> "+utils.SprintArray(array_arg))
+	}
+	res, err := session.ExecPrepare(sql, array_arg...)
+	defer func() {
+		if sessionEngine.LogEnable() {
+			var RowsAffected = "0"
+			if err == nil && res != nil {
+				RowsAffected = strconv.FormatInt(res.RowsAffected, 10)
+			}
+			sessionEngine.LogSystem().SendLog("[GoMybatis] [", session.Id(), "] RowsAffected <== "+RowsAffected)
+			if err != nil {
+				sessionEngine.LogSystem().SendLog("[GoMybatis] [", session.Id(), "] error == "+err.Error())
+			}
+		}
+	}()
+
+	if err != nil {
+		return -1, err
+	}
+	if haveLastReturnValue {
+		returnValue.Elem().SetInt(res.RowsAffected)
+	}
+	return res.LastInsertId, err
 }
 
 func closeSession(factory *SessionFactory, session Session) {
@@ -572,9 +613,11 @@ func scanStructArgFields(v reflect.Value, tag *TagArg) map[string]interface{} {
 }
 
 func isCustomStruct(value reflect.Type) bool {
-	if value.Kind() == reflect.Struct && value.String() != GoMybatis_Time && value.String() != GoMybatis_Time_Ptr {
-		return true
-	} else {
-		return false
+	if value.Kind() == reflect.Ptr {
+		value = value.Elem()
 	}
+
+	return value.Kind() == reflect.Struct &&
+		value.String() != GoMybatis_Time &&
+		value.String() != GoMybatis_Time_Ptr
 }

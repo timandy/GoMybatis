@@ -25,6 +25,7 @@ type GoMybatisEngine struct {
 	goroutineSessionMap *GoroutineSessionMap  //map[协程id]Session
 	goroutineIDEnable   bool                  //是否启用goroutineIDEnable（注意（该方法需要在多协程环境下调用）启用会从栈获取协程id，有一定性能消耗，换取最大的事务定义便捷,单线程处理场景可以关闭此配置）
 	panicOnError        bool                  //执行sql失败时是否panic
+	writeBackAutoField  bool                  //执行 insert() 时是否写回自增列
 }
 
 func (it GoMybatisEngine) New() GoMybatisEngine {
@@ -238,4 +239,12 @@ func (it *GoMybatisEngine) SetPanicOnError(value bool) {
 
 func (it *GoMybatisEngine) IsPanicOnError() bool {
 	return it.panicOnError
+}
+
+func (it *GoMybatisEngine) SetWriteBackAutoField(value bool) {
+	it.writeBackAutoField = value
+}
+
+func (it *GoMybatisEngine) IsWriteBackAutoFiled() bool {
+	return it.writeBackAutoField
 }
