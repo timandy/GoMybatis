@@ -2,8 +2,8 @@ package GoMybatis
 
 import (
 	"bytes"
-	"github.com/timandy/GoMybatis/lib/github.com/beevik/etree"
-	"github.com/timandy/GoMybatis/utils"
+	"github.com/timandy/GoMybatis/v7/lib/github.com/beevik/etree"
+	"github.com/timandy/GoMybatis/v7/utils"
 	"reflect"
 	"strconv"
 	"strings"

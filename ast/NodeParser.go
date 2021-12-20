@@ -1,7 +1,7 @@
 package ast
 
 import (
-	"github.com/timandy/GoMybatis/lib/github.com/beevik/etree"
+	"github.com/timandy/GoMybatis/v7/lib/github.com/beevik/etree"
 	"reflect"
 	"strings"
 )

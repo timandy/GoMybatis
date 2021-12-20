@@ -2,9 +2,9 @@ package GoMybatis
 
 import (
 	"fmt"
-	"github.com/timandy/GoMybatis/example"
-	"github.com/timandy/GoMybatis/stmt"
-	"github.com/timandy/GoMybatis/tx"
+	"github.com/timandy/GoMybatis/v7/example"
+	"github.com/timandy/GoMybatis/v7/stmt"
+	"github.com/timandy/GoMybatis/v7/tx"
 	"testing"
 	"time"
 )

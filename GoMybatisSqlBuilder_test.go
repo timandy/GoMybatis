@@ -2,10 +2,10 @@ package GoMybatis
 
 import (
 	"fmt"
-	"github.com/timandy/GoMybatis/engines"
-	"github.com/timandy/GoMybatis/lib/github.com/beevik/etree"
-	"github.com/timandy/GoMybatis/stmt"
-	"github.com/timandy/GoMybatis/utils"
+	"github.com/timandy/GoMybatis/v7/engines"
+	"github.com/timandy/GoMybatis/v7/lib/github.com/beevik/etree"
+	"github.com/timandy/GoMybatis/v7/stmt"
+	"github.com/timandy/GoMybatis/v7/utils"
 	"testing"
 	"time"
 )

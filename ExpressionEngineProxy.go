@@ -1,8 +1,8 @@
 package GoMybatis
 
 import (
-	"github.com/timandy/GoMybatis/ast"
-	"github.com/timandy/GoMybatis/utils"
+	"github.com/timandy/GoMybatis/v7/ast"
+	"github.com/timandy/GoMybatis/v7/utils"
 )
 
 type ExpressionEngineProxy struct {

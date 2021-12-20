@@ -2,7 +2,7 @@ package GoMybatis
 
 import (
 	"database/sql"
-	"github.com/timandy/GoMybatis/utils"
+	"github.com/timandy/GoMybatis/v7/utils"
 )
 
 //动态数据源路由

@@ -1,7 +1,7 @@
 package GoMybatis
 
 import (
-	"github.com/timandy/GoMybatis/utils"
+	"github.com/timandy/GoMybatis/v7/utils"
 	"sync"
 )
 

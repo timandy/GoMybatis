@@ -3,7 +3,7 @@ package ast
 import (
 	"bytes"
 	"errors"
-	"github.com/timandy/GoMybatis/stmt"
+	"github.com/timandy/GoMybatis/v7/stmt"
 	"reflect"
 )
 

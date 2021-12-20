@@ -1,6 +1,6 @@
 package ast
 
-import "github.com/timandy/GoMybatis/stmt"
+import "github.com/timandy/GoMybatis/v7/stmt"
 
 type NodeBind struct {
 	t NodeType
