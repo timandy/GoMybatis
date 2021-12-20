@@ -239,9 +239,6 @@ func makeReturnTypeMap(value reflect.Type) (returnMap map[string]*ReturnType) {
 				returnMap[funcName].ErrorType = &outType
 			}
 		}
-		if returnMap[funcName].ErrorType == nil {
-			panic("[GoMybatis] func '" + funcName + "()' must return an 'error'!")
-		}
 	}
 	return returnMap
 }
@@ -305,22 +302,6 @@ func makeMethodXmlMap(bean reflect.Value, mapperTree map[string]etree.Token, eng
 //方法基本规则检查
 func methodFieldCheck(beanType *reflect.Type, methodType *reflect.StructField, warning bool) {
 	if methodType.Type.NumOut() < 1 {
-		var buffer bytes.Buffer
-		buffer.WriteString("[GoMybatis] bean ")
-		buffer.WriteString((*beanType).Name())
-		buffer.WriteString(".")
-		buffer.WriteString(methodType.Name)
-		buffer.WriteString("() must be return a 'error' type!")
-		panic(buffer.String())
-	}
-	var errorTypeNum = 0
-	for i := 0; i < methodType.Type.NumOut(); i++ {
-		var outType = methodType.Type.Out(i)
-		if outType.Kind() == reflect.Interface && outType.String() == "error" {
-			errorTypeNum++
-		}
-	}
-	if errorTypeNum != 1 {
 		var buffer bytes.Buffer
 		buffer.WriteString("[GoMybatis] bean ")
 		buffer.WriteString((*beanType).Name())
