@@ -127,7 +127,7 @@ func WriteMapper(bean reflect.Value, xml []byte, sessionEngine SessionEngine) {
 					panic(err)
 				}
 				if sessionEngine.IsWriteBackAutoFiled() {
-					writeBackAutoField(arg.Args[0], returnType.AutoFiledName, autoFieldValue)
+					writeBackAutoField(arg, returnType.AutoFiledName, autoFieldValue)
 				}
 				return buildReturnValues(returnType, returnValue, err)
 			}
@@ -136,17 +136,17 @@ func WriteMapper(bean reflect.Value, xml []byte, sessionEngine SessionEngine) {
 	})
 }
 
-func writeBackAutoField(arg reflect.Value, fieldName string, fieldValue int64) {
-	if fieldValue == -1 || len(fieldName) == 0 {
+func writeBackAutoField(arg ProxyArg, fieldName string, fieldValue int64) {
+	if fieldValue == -1 || len(fieldName) == 0 || len(arg.Args) != 1 {
 		return
 	}
 
-	value := arg
+	value := arg.Args[0]
 	if value.Kind() == reflect.Ptr {
 		if value.IsNil() {
 			return
 		}
-		value = arg.Elem()
+		value = value.Elem()
 	}
 
 	if value.Kind() != reflect.Struct {
