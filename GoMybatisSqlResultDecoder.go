@@ -5,6 +5,7 @@ import (
 	"github.com/timandy/GoMybatis/v7/utils"
 	"reflect"
 	"strings"
+	"unicode"
 )
 
 type GoMybatisSqlResultDecoder struct {
@@ -87,10 +88,41 @@ func makeStructMap(itemType reflect.Type) (map[string]*reflect.Type, error) {
 	}
 	var structMap = map[string]*reflect.Type{}
 	for i := 0; i < itemType.NumField(); i++ {
-		var item = itemType.Field(i)
-		structMap[strings.ToLower(item.Tag.Get("json"))] = &item.Type
+		item := itemType.Field(i)
+		jsonTag := item.Tag.Get("json")
+		if len(jsonTag) == 0 {
+			structMap[item.Name] = &item.Type
+		} else {
+			structMap[jsonTag] = &item.Type
+		}
 	}
 	return structMap, nil
+}
+
+//字符串转换为大写驼峰样式, 例如 hello_world => HelloWorld
+func toUpperCamelCase(filedName string) string {
+	strLen := len(filedName)
+	if strLen == 0 {
+		return ""
+	}
+
+	builder := &strings.Builder{}
+	findUnderLine := true
+	for _, c := range filedName {
+		if c == '_' {
+			findUnderLine = true
+			continue
+		}
+
+		if findUnderLine {
+			builder.WriteRune(unicode.ToUpper(c))
+			findUnderLine = false
+			continue
+		}
+
+		builder.WriteRune(c)
+	}
+	return builder.String()
 }
 
 //make an json value
@@ -101,8 +133,13 @@ func makeJsonObjBytes(resultMap map[string]*ResultProperty, sqlData map[string][
 	var done = len(sqlData) - 1
 	var index = 0
 	for k, sqlV := range sqlData {
+		//字段名
+		fieldName := k
+		if _, exists := structMap[k]; !exists {
+			fieldName = toUpperCamelCase(k)
+		}
 		jsonData.WriteString("\"")
-		jsonData.WriteString(k)
+		jsonData.WriteString(fieldName)
 		jsonData.WriteString("\":")
 
 		var isStringType = false
@@ -116,7 +153,7 @@ func makeJsonObjBytes(resultMap map[string]*ResultProperty, sqlData map[string][
 				fetched = false
 			}
 		} else if structMap != nil {
-			var v = structMap[strings.ToLower(k)]
+			var v = structMap[fieldName]
 			if v != nil {
 				if (*v).Kind() == reflect.String || (*v).String() == "time.Time" {
 					isStringType = true

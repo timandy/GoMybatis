@@ -2,6 +2,7 @@ package GoMybatis
 
 import (
 	"fmt"
+	"github.com/stretchr/testify/assert"
 	"github.com/timandy/GoMybatis/v7/utils"
 	"testing"
 	"time"
@@ -21,6 +22,20 @@ type TestResult struct {
 	Age8    uint64  `json:"age_8"`
 	Bool    bool    `json:"bool"`
 	F       bool    `json:"f"`
+}
+
+func Test_ToUpperCamelCase(t *testing.T) {
+	testToUpperCamelCase(t, "", "")
+	testToUpperCamelCase(t, "", "_")
+	testToUpperCamelCase(t, "H", "_h")
+	testToUpperCamelCase(t, "H", "h")
+	testToUpperCamelCase(t, "HelloWORLD", "hello_WORLD")
+	testToUpperCamelCase(t, "HelloWORLD", "hello_wORLD")
+	testToUpperCamelCase(t, "HelloWorld", "HelloWorld")
+}
+
+func testToUpperCamelCase(t *testing.T, expect string, source string) {
+	assert.Equal(t, expect, toUpperCamelCase(source))
 }
 
 //解码基本数据-int,string,time.Time...
