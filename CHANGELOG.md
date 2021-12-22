@@ -8,6 +8,7 @@
 - Support panic on error.
 - Support expand slice, like in #{ids}.
 - Support write back auto increasing field, type:"auto".
+- Support database's field auto mapping to golang's struct field with UpperCamelCase.
 
 # Links
 
