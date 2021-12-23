@@ -48,18 +48,18 @@ func (it GoMybatisSqlResultDecoder) Decode(resultMap map[string]*ResultProperty,
 				break
 			}
 		} else {
-			var structMap, e = makeStructMap(resultV.Type())
+			var structMap, basicType, e = makeStructMap(resultV.Type())
 			if e != nil {
 				return e
 			}
-			value = makeJsonObjBytes(resultMap, sqlResult[0], structMap)
+			value = makeJsonObjBytes(resultMap, sqlResult[0], structMap, basicType)
 		}
 	} else {
 		if resultV.Type().Kind() != reflect.Array && resultV.Type().Kind() != reflect.Slice {
 			return utils.NewError("SqlResultDecoder", " decode type not an struct array or slice!")
 		}
 		var resultVItemType = resultV.Type().Elem()
-		var structMap, e = makeStructMap(resultVItemType)
+		var structMap, basicType, e = makeStructMap(resultVItemType)
 		if e != nil {
 			return e
 		}
@@ -68,7 +68,7 @@ func (it GoMybatisSqlResultDecoder) Decode(resultMap map[string]*ResultProperty,
 		var jsonData = strings.Builder{}
 		jsonData.WriteString("[")
 		for _, v := range sqlResult {
-			jsonData.Write(makeJsonObjBytes(resultMap, v, structMap))
+			jsonData.Write(makeJsonObjBytes(resultMap, v, structMap, basicType))
 			//write ','
 			if index < done {
 				jsonData.WriteString(",")
@@ -82,33 +82,61 @@ func (it GoMybatisSqlResultDecoder) Decode(resultMap map[string]*ResultProperty,
 	return e
 }
 
-func makeStructMap(itemType reflect.Type) (map[string]*reflect.Type, error) {
-	var structMap = map[string]*reflect.Type{}
-	makeStructMapCore(itemType, structMap)
-	return structMap, nil
+func makeStructMap(itemType reflect.Type) (structMap map[string]*reflect.Type, basicType *reflect.Type, err error) {
+	structMap = map[string]*reflect.Type{}
+	basicType = makeStructMapCore(itemType, structMap)
+	return
 }
 
-func makeStructMapCore(itemType reflect.Type, structMap map[string]*reflect.Type) {
+func makeStructMapCore(itemType reflect.Type, structMap map[string]*reflect.Type) *reflect.Type {
 	if itemType.Kind() == reflect.Ptr {
 		itemType = itemType.Elem()
 	}
-	if itemType.Kind() != reflect.Struct {
-		return
-	}
-	for i := 0; i < itemType.NumField(); i++ {
-		structField := itemType.Field(i)
-		if structField.Anonymous {
-			makeStructMapCore(structField.Type, structMap)
-			continue
+
+	switch itemType.Kind() {
+	case
+		reflect.Bool,
+		reflect.Int,
+		reflect.Int8,
+		reflect.Int16,
+		reflect.Int32,
+		reflect.Int64,
+		reflect.Uint,
+		reflect.Uint8,
+		reflect.Uint16,
+		reflect.Uint32,
+		reflect.Uint64,
+		reflect.Uintptr,
+		reflect.Float32,
+		reflect.Float64,
+		reflect.Complex64,
+		reflect.Complex128,
+		reflect.String:
+		return &itemType
+
+	case reflect.Struct:
+		if itemType.String() == "time.Time" {
+			return &itemType
 		}
-		jsonTag := structField.Tag.Get("json")
-		if len(jsonTag) == 0 {
-			structMap[structField.Name] = &structField.Type
-		} else {
-			structMap[jsonTag] = &structField.Type
+
+		for i := 0; i < itemType.NumField(); i++ {
+			structField := itemType.Field(i)
+			if structField.Anonymous {
+				makeStructMapCore(structField.Type, structMap)
+				continue
+			}
+			jsonTag := structField.Tag.Get("json")
+			if len(jsonTag) == 0 {
+				structMap[structField.Name] = &structField.Type
+			} else {
+				structMap[jsonTag] = &structField.Type
+			}
 		}
+		return nil
+
+	default:
+		return nil
 	}
-	return
 }
 
 //字符串转换为大写驼峰样式, 例如 hello_world => HelloWorld
@@ -138,7 +166,21 @@ func toUpperCamelCase(filedName string) string {
 }
 
 //make an json value
-func makeJsonObjBytes(resultMap map[string]*ResultProperty, sqlData map[string][]byte, structMap map[string]*reflect.Type) []byte {
+func makeJsonObjBytes(resultMap map[string]*ResultProperty, sqlData map[string][]byte, structMap map[string]*reflect.Type, basicType *reflect.Type) []byte {
+	if len(sqlData) == 1 && basicType != nil {
+		for _, sqlV := range sqlData { //只有一列,所以只遍历一次
+			if (*basicType).Kind() == reflect.String || (*basicType).String() == "time.Time" {
+				return []byte("\"" + encodeStringValue(sqlV) + "\"")
+			} else if sqlV == nil || len(sqlV) == 0 {
+				return []byte("null")
+			} else {
+				return sqlV
+			}
+		}
+		//make sure return
+		return nil
+	}
+
 	var jsonData = strings.Builder{}
 	jsonData.WriteString("{")
 
