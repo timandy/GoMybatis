@@ -83,23 +83,32 @@ func (it GoMybatisSqlResultDecoder) Decode(resultMap map[string]*ResultProperty,
 }
 
 func makeStructMap(itemType reflect.Type) (map[string]*reflect.Type, error) {
+	var structMap = map[string]*reflect.Type{}
+	makeStructMapCore(itemType, structMap)
+	return structMap, nil
+}
+
+func makeStructMapCore(itemType reflect.Type, structMap map[string]*reflect.Type) {
 	if itemType.Kind() == reflect.Ptr {
 		itemType = itemType.Elem()
 	}
 	if itemType.Kind() != reflect.Struct {
-		return nil, nil
+		return
 	}
-	var structMap = map[string]*reflect.Type{}
 	for i := 0; i < itemType.NumField(); i++ {
-		item := itemType.Field(i)
-		jsonTag := item.Tag.Get("json")
+		structField := itemType.Field(i)
+		if structField.Anonymous {
+			makeStructMapCore(structField.Type, structMap)
+			continue
+		}
+		jsonTag := structField.Tag.Get("json")
 		if len(jsonTag) == 0 {
-			structMap[item.Name] = &item.Type
+			structMap[structField.Name] = &structField.Type
 		} else {
-			structMap[jsonTag] = &item.Type
+			structMap[jsonTag] = &structField.Type
 		}
 	}
-	return structMap, nil
+	return
 }
 
 //字符串转换为大写驼峰样式, 例如 hello_world => HelloWorld
