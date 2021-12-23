@@ -83,6 +83,9 @@ func (it GoMybatisSqlResultDecoder) Decode(resultMap map[string]*ResultProperty,
 }
 
 func makeStructMap(itemType reflect.Type) (map[string]*reflect.Type, error) {
+	if itemType.Kind() == reflect.Ptr {
+		itemType = itemType.Elem()
+	}
 	if itemType.Kind() != reflect.Struct {
 		return nil, nil
 	}

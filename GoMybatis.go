@@ -249,8 +249,8 @@ func makeReturnTypeMap(value reflect.Type) (returnMap map[string]*ReturnType) {
 			var outType = funcType.Out(f)
 			if funcName != NewSessionFunc {
 				//过滤NewSession方法
-				if outType.Kind() == reflect.Ptr || (outType.Kind() == reflect.Interface && outType.String() != "error") {
-					panic("[GoMybatis] func '" + funcName + "()' return '" + outType.String() + "' can not be a 'ptr' or 'interface'!")
+				if outType.Kind() == reflect.Interface && outType.String() != "error" {
+					panic("[GoMybatis] func '" + funcName + "()' return '" + outType.String() + "' can not be a 'interface'!")
 				}
 			}
 			var returnType = returnMap[funcName]
