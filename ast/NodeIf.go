@@ -25,6 +25,7 @@ func (it *NodeIf) Eval(env map[string]interface{}, arg_array *[]interface{}, stm
 	var result, err = it.holder.GetExpressionEngineProxy().LexerAndEval(it.test, env)
 	if err != nil {
 		err = utils.NewError("GoMybatisSqlBuilder", "[GoMybatis] <test `", it.test, `> fail,`, err.Error())
+		return nil, err
 	}
 	if result.(bool) {
 		return DoChildNodes(it.childs, env, arg_array, stmtConvert)
