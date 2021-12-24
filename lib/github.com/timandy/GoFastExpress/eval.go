@@ -113,6 +113,8 @@ func Eval(express string, operator Operator, a interface{}, b interface{}) (inte
 		return !r, nil
 	case Add, Reduce, Ride, Divide:
 		return DoCalculationAction(express, operator, a, b, av, bv)
+	case Size:
+		return DoUnaryAction(express, operator, a, av)
 	}
 	return nil, errors.New("[express] " + express + " find not support operator :" + operator)
 }
@@ -251,5 +253,26 @@ func DoCalculationAction(express string, operator Operator, a interface{}, b int
 		}
 		return a.(float64) / b.(float64), nil
 	}
+	return "", errors.New("[express] " + express + "find not support operator :" + operator)
+}
+
+func DoUnaryAction(express string, operator Operator, a interface{}, av reflect.Value) (interface{}, error) {
+	if a == nil {
+		return 0, nil
+	}
+	//start unary
+	a, av = GetDeepValue(av, a)
+	switch operator {
+	case Size:
+		switch av.Kind() {
+		case reflect.Array,
+			reflect.Chan,
+			reflect.Map,
+			reflect.Slice,
+			reflect.String:
+			return av.Len(), nil
+		}
+	}
+
 	return "", errors.New("[express] " + express + "find not support operator :" + operator)
 }

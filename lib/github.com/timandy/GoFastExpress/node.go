@@ -10,6 +10,7 @@ const (
 	NUInt            //uint节点
 	NBool            //bool节点
 	NNil             //空节点
+	NUnary           //一元计算节点
 	NBinary          //二元计算节点
 	NOpt             //操作符节点
 )
@@ -30,6 +31,8 @@ func (it nodeType) ToString() string {
 		return "NBool"
 	case NNil:
 		return "NNil"
+	case NUnary:
+		return "NUnary"
 	case NBinary:
 		return "NBinary"
 	case NOpt:
@@ -199,7 +202,38 @@ func (NilNode) Eval(env interface{}) (interface{}, error) {
 	return nil, nil
 }
 
-//计算节点
+//一元计算节点
+type UnaryNode struct {
+	node Node
+	opt  Operator
+	t    nodeType
+}
+
+func (it UnaryNode) Type() nodeType {
+	return NUnary
+}
+
+func (it UnaryNode) Eval(env interface{}) (interface{}, error) {
+	var left interface{}
+	var e error
+	if it.node != nil {
+		left, e = it.node.Eval(env)
+		if e != nil {
+			return nil, e
+		}
+	}
+	return Eval(it.Express(), it.opt, left, nil)
+}
+
+func (it UnaryNode) Express() string {
+	var s = ""
+	if it.node != nil {
+		s += it.node.Express() + "." + it.opt
+	}
+	return s
+}
+
+//二元计算节点
 type BinaryNode struct {
 	left  Node
 	right Node
@@ -216,7 +250,7 @@ func (it BinaryNode) Express() string {
 		s += it.left.Express()
 	}
 	if it.right != nil {
-		s += it.right.Express()
+		s += " " + it.opt + " " + it.right.Express()
 	}
 	return s
 }

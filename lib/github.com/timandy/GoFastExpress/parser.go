@@ -12,6 +12,9 @@ import (
 type Operator = string
 
 const (
+	//一元操作符
+	Size Operator = "size"
+
 	//计算操作符
 	Add    Operator = "+"
 	Reduce Operator = "-"
@@ -33,7 +36,7 @@ const (
 )
 
 //乘除优先于加减 计算优于比较,
-var priorityArray = []Operator{Ride, Divide, Add, Reduce,
+var priorityArray = []Operator{Size, Ride, Divide, Add, Reduce,
 	LessEqual, Less, MoreEqual, More,
 	UnEqual, Equal, And, Or}
 
@@ -187,14 +190,55 @@ func parserNode(express string, v Operator) (Node, error) {
 	}
 	e = nil
 
-	var values = strings.Split(v, ".")
+	var values = trimRemoveEmptyEntries(strings.Split(v, "."))
+	valuesLen := len(values)
+	if valuesLen == 0 {
+		return nil, errors.New("no values found")
+	}
+	if valuesLen == 1 {
+		var argNode = ArgNode{
+			value:     v,
+			values:    values,
+			valuesLen: 1,
+			t:         NArg,
+		}
+		return argNode, nil
+	}
+
+	return buildUnaryNode(values), nil
+}
+
+func trimRemoveEmptyEntries(values []string) []string {
+	curIndex := 0
+	for _, value := range values {
+		value = strings.TrimSpace(value)
+		if len(value) == 0 {
+			continue
+		}
+		values[curIndex] = value
+		curIndex++
+	}
+	return values[0:curIndex]
+}
+
+func buildUnaryNode(values []string) Node {
 	var argNode = ArgNode{
-		value:     v,
-		values:    values,
-		valuesLen: len(values),
+		value:     values[0],
+		values:    values[0:1],
+		valuesLen: 1,
 		t:         NArg,
 	}
-	return argNode, nil
+	var lastNode Node
+	lastNode = argNode
+	for i := 1; i < len(values); i++ {
+		var biNode = UnaryNode{
+			node: lastNode,
+			opt:  values[i],
+			t:    NUnary,
+		}
+		lastNode = biNode
+	}
+	return lastNode
 }
 
 func findReplaceOpt(express string, operator Operator, nodearg *[]Node) error {
@@ -236,7 +280,7 @@ func haveOpt(nodes []Node) bool {
 }
 
 func ParserOperators(express string) []Operator {
-	var newResult []string
+	var newResult []Operator
 	src := []byte(express)
 	var s scanner.Scanner
 	fset := token.NewFileSet()
