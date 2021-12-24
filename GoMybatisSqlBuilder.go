@@ -3,6 +3,7 @@ package GoMybatis
 import (
 	"github.com/timandy/GoMybatis/v7/ast"
 	"github.com/timandy/GoMybatis/v7/stmt"
+	"strings"
 )
 
 type GoMybatisSqlBuilder struct {
@@ -32,8 +33,22 @@ func (it *GoMybatisSqlBuilder) BuildSql(paramMap map[string]interface{}, nodes [
 	if err != nil {
 		return "", err
 	}
-	var sqlStr = string(sql)
-	return sqlStr, nil
+
+	return FormatSql(string(sql)), nil
+}
+
+func FormatSql(sql string) string {
+	split := strings.Split(sql, " ")
+	curIndex := 0
+	for i := 0; i < len(split); i++ {
+		curStr := split[i]
+		if len(curStr) == 0 {
+			continue
+		}
+		split[curIndex] = curStr
+		curIndex++
+	}
+	return strings.Join(split[0:curIndex], " ")
 }
 
 func (it *GoMybatisSqlBuilder) SetEnableLog(enable bool) {
