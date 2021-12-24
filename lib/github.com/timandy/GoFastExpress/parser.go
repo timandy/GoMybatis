@@ -144,6 +144,13 @@ func parserNode(express string, v Operator) (Node, error) {
 		}
 		return inode, nil
 	}
+	if strings.Index(v, "\"") == 0 && strings.LastIndex(v, "\"") == (len(v)-1) {
+		var inode = StringNode{
+			value: string([]byte(v)[1 : len(v)-1]),
+			t:     NString,
+		}
+		return inode, nil
+	}
 	if strings.Index(v, "`") == 0 && strings.LastIndex(v, "`") == (len(v)-1) {
 		var inode = StringNode{
 			value: string([]byte(v)[1 : len(v)-1]),
