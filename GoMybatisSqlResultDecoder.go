@@ -165,12 +165,21 @@ func toUpperCamelCase(filedName string) string {
 	return builder.String()
 }
 
+func toBoolString(bytes []byte) []byte {
+	if len(bytes) == 1 && bytes[0] == '0' {
+		return []byte("false")
+	}
+	return []byte("true")
+}
+
 //make an json value
 func makeJsonObjBytes(resultMap map[string]*ResultProperty, sqlData map[string][]byte, structMap map[string]*reflect.Type, basicType *reflect.Type) []byte {
 	if len(sqlData) == 1 && basicType != nil {
 		for _, sqlV := range sqlData { //只有一列,所以只遍历一次
 			if (*basicType).Kind() == reflect.String || (*basicType).String() == "time.Time" {
 				return []byte("\"" + encodeStringValue(sqlV) + "\"")
+			} else if (*basicType).Kind() == reflect.Bool {
+				return toBoolString(sqlV)
 			} else if sqlV == nil || len(sqlV) == 0 {
 				return []byte("null")
 			} else {
@@ -197,24 +206,29 @@ func makeJsonObjBytes(resultMap map[string]*ResultProperty, sqlData map[string][
 		jsonData.WriteString("\":")
 
 		var isStringType = false
+		var isBoolType = false
 		var fetched = true
 		if resultMap != nil {
 			var resultMapItem = resultMap[k]
-			if resultMapItem != nil && (resultMapItem.LangType == "string" || resultMapItem.LangType == "time.Time") {
-				isStringType = true
-			}
 			if resultMapItem == nil {
 				fetched = false
+			} else {
+				if resultMapItem.LangType == "string" || resultMapItem.LangType == "time.Time" {
+					isStringType = true
+				} else if resultMapItem.LangType == "bool" {
+					isBoolType = true
+				}
 			}
 		} else if structMap != nil {
 			var v = structMap[fieldName]
-			if v != nil {
-				if (*v).Kind() == reflect.String || (*v).String() == "time.Time" {
-					isStringType = true
-				}
-			}
 			if v == nil {
 				fetched = false
+			} else {
+				if (*v).Kind() == reflect.String || (*v).String() == "time.Time" {
+					isStringType = true
+				} else if (*v).Kind() == reflect.Bool {
+					isBoolType = true
+				}
 			}
 		} else {
 			isStringType = true
@@ -224,10 +238,13 @@ func makeJsonObjBytes(resultMap map[string]*ResultProperty, sqlData map[string][
 				jsonData.WriteString("\"")
 				jsonData.WriteString(encodeStringValue(sqlV))
 				jsonData.WriteString("\"")
+			} else if isBoolType {
+				sqlV = toBoolString(sqlV)
+				jsonData.Write(sqlV)
+			} else if sqlV == nil || len(sqlV) == 0 {
+				sqlV = []byte("null")
+				jsonData.Write(sqlV)
 			} else {
-				if sqlV == nil || len(sqlV) == 0 {
-					sqlV = []byte("null")
-				}
 				jsonData.Write(sqlV)
 			}
 		} else {
