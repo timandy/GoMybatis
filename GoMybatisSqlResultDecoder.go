@@ -165,6 +165,18 @@ func toUpperCamelCase(filedName string) string {
 	return builder.String()
 }
 
+func isStringInJson(typeName string) bool {
+	return typeName == "string" ||
+		typeName == "*string" ||
+		typeName == "time.Time" ||
+		typeName == "*time.Time"
+}
+
+func isBoolInJson(typeName string) bool {
+	return typeName == "bool" ||
+		typeName == "*bool"
+}
+
 func toBoolString(bytes []byte) []byte {
 	if len(bytes) == 1 && bytes[0] == '0' {
 		return []byte("false")
@@ -175,13 +187,16 @@ func toBoolString(bytes []byte) []byte {
 //make an json value
 func makeJsonObjBytes(resultMap map[string]*ResultProperty, sqlData map[string][]byte, structMap map[string]*reflect.Type, basicType *reflect.Type) []byte {
 	if len(sqlData) == 1 && basicType != nil {
+		basicTypeName := (*basicType).String()
+		isString := isStringInJson(basicTypeName)
+		isBool := isBoolInJson(basicTypeName)
 		for _, sqlV := range sqlData { //只有一列,所以只遍历一次
-			if (*basicType).Kind() == reflect.String || (*basicType).String() == "time.Time" {
-				return []byte("\"" + encodeStringValue(sqlV) + "\"")
-			} else if (*basicType).Kind() == reflect.Bool {
-				return toBoolString(sqlV)
-			} else if sqlV == nil || len(sqlV) == 0 {
+			if len(sqlV) == 0 {
 				return []byte("null")
+			} else if isString {
+				return []byte("\"" + encodeStringValue(sqlV) + "\"")
+			} else if isBool {
+				return toBoolString(sqlV)
 			} else {
 				return sqlV
 			}
@@ -213,9 +228,9 @@ func makeJsonObjBytes(resultMap map[string]*ResultProperty, sqlData map[string][
 			if resultMapItem == nil {
 				fetched = false
 			} else {
-				if resultMapItem.LangType == "string" || resultMapItem.LangType == "time.Time" {
+				if isStringInJson(resultMapItem.LangType) {
 					isStringType = true
-				} else if resultMapItem.LangType == "bool" {
+				} else if isBoolInJson(resultMapItem.LangType) {
 					isBoolType = true
 				}
 			}
@@ -224,9 +239,9 @@ func makeJsonObjBytes(resultMap map[string]*ResultProperty, sqlData map[string][
 			if v == nil {
 				fetched = false
 			} else {
-				if (*v).Kind() == reflect.String || (*v).String() == "time.Time" {
+				if isStringInJson((*v).String()) {
 					isStringType = true
-				} else if (*v).Kind() == reflect.Bool {
+				} else if isBoolInJson((*v).String()) {
 					isBoolType = true
 				}
 			}
@@ -234,15 +249,15 @@ func makeJsonObjBytes(resultMap map[string]*ResultProperty, sqlData map[string][
 			isStringType = true
 		}
 		if fetched {
-			if isStringType {
+			if sqlV == nil || len(sqlV) == 0 {
+				sqlV = []byte("null")
+				jsonData.Write(sqlV)
+			} else if isStringType {
 				jsonData.WriteString("\"")
 				jsonData.WriteString(encodeStringValue(sqlV))
 				jsonData.WriteString("\"")
 			} else if isBoolType {
 				sqlV = toBoolString(sqlV)
-				jsonData.Write(sqlV)
-			} else if sqlV == nil || len(sqlV) == 0 {
-				sqlV = []byte("null")
 				jsonData.Write(sqlV)
 			} else {
 				jsonData.Write(sqlV)
