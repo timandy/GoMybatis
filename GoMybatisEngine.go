@@ -35,7 +35,7 @@ func (it GoMybatisEngine) New() GoMybatisEngine {
 		it.log = &LogStandard{}
 	}
 	if it.logEnable {
-		var logSystem, err = LogSystem{}.New(it.log, it.log.QueueLen())
+		var logSystem, err = LogSystem{}.New(it.log)
 		if err != nil {
 			panic(err)
 		}
