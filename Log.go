@@ -1,5 +1,5 @@
 package GoMybatis
 
 type Log interface {
-	Println(messages []byte) //日志输出方法实现
+	Println(messages ...string) //日志输出方法实现
 }
