@@ -63,7 +63,7 @@ func (it *LocalSession) Rollback() error {
 			var point = it.savePointStack.Pop()
 			if point != nil {
 				if it.log != nil {
-					it.log.Println("[GoMybatis] [" + it.Id() + "] exec ====================" + "rollback to " + *point)
+					it.log.Println("[GoMybatis] [%v] exec ====================rollback to %v", it.Id(), *point)
 				}
 				_, e := t.Exec("rollback to " + *point)
 				e = it.dbErrorPack(e)
@@ -75,7 +75,7 @@ func (it *LocalSession) Rollback() error {
 
 		if it.txStack.Len() == 0 {
 			if it.log != nil {
-				it.log.Println(("[GoMybatis] [" + it.Id() + "] Rollback Session"))
+				it.log.Println("[GoMybatis] [%v] Rollback Session", it.Id())
 			}
 			var err = t.Rollback()
 			if err != nil {
@@ -111,7 +111,7 @@ func (it *LocalSession) Commit() error {
 			var pId = "p" + strconv.Itoa(it.txStack.Len()+1)
 			it.savePointStack.Push(pId)
 			if it.log != nil {
-				it.log.Println(("[GoMybatis] [" + it.Id() + "] exec " + "savepoint " + pId))
+				it.log.Println("[GoMybatis] [%v] exec savepoint %v", it.Id(), pId)
 			}
 			_, e := t.Exec("savepoint " + pId)
 			e = it.dbErrorPack(e)
@@ -121,7 +121,7 @@ func (it *LocalSession) Commit() error {
 		}
 		if it.txStack.Len() == 0 {
 			if it.log != nil {
-				it.log.Println(("[GoMybatis] [" + it.Id() + "] Commit tx session:" + it.Id()))
+				it.log.Println("[GoMybatis] [%v] Commit tx session: %v", it.Id(), it.Id())
 			}
 			var err = t.Commit()
 			if err != nil {
@@ -138,7 +138,7 @@ func (it *LocalSession) Begin(p *tx.Propagation) error {
 		propagation = tx.ToString(*p)
 	}
 	if it.log != nil {
-		it.log.Println(("[GoMybatis] [" + it.Id() + "] Begin session(Propagation:" + propagation + ")"))
+		it.log.Println("[GoMybatis] [%v] Begin session(Propagation:%v)", it.Id(), propagation)
 	}
 	if it.isClosed == true {
 		return utils.NewError("LocalSession", " can not Begin() a Closed Session!")
@@ -266,7 +266,7 @@ func (it *LocalSession) LastPROPAGATION() *tx.Propagation {
 
 func (it *LocalSession) Close() {
 	if it.log != nil {
-		it.log.Println(("[GoMybatis] [" + it.Id() + "] Close session"))
+		it.log.Println("[GoMybatis] [%v] Close session", it.Id())
 	}
 	if it.newLocalSession != nil {
 		it.newLocalSession.Close()
