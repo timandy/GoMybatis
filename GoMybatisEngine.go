@@ -115,7 +115,7 @@ func (it *GoMybatisEngine) SetLogEnable(enable bool) {
 type EmptyLog struct {
 }
 
-func (EmptyLog) Println(messages ...string) {
+func (EmptyLog) Println(messages ...interface{}) {
 
 }
 

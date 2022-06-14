@@ -94,7 +94,7 @@ func doNativeMethod(funcField reflect.StructField, arg ProxyArg, nativeImplFunc 
 				panic(fmt.Sprint(err) + rollbackErr.Error())
 			}
 			if log != nil {
-				log.Println((fmt.Sprint(err) + " Throw out error will Rollback! from >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " + funcField.Name + "()"))
+				log.Println("%v Throw out error will Rollback! from >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> %v()", fmt.Sprint(err), funcField.Name)
 			}
 			panic(err)
 		}
