@@ -132,13 +132,6 @@ func (it *GoMybatisEngine) Log() Log {
 func (it *GoMybatisEngine) SetLog(log Log) {
 	it.initCheck()
 	it.log = log
-	if it.logEnable {
-		var logSystem, err = LogSystem{}.New(it.log)
-		if err != nil {
-			panic(err)
-		}
-		it.logSystem = &logSystem
-	}
 }
 
 //session工厂
