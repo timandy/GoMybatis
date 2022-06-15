@@ -4,9 +4,11 @@ import (
 	"bytes"
 	"github.com/timandy/GoMybatis/v7/ast"
 	"github.com/timandy/GoMybatis/v7/lib/github.com/beevik/etree"
+	"github.com/timandy/GoMybatis/v7/plugin/page"
 	"github.com/timandy/GoMybatis/v7/stmt"
 	"github.com/timandy/GoMybatis/v7/utils"
 	"log"
+	"math"
 	"reflect"
 	"strconv"
 	"strings"
@@ -412,14 +414,73 @@ func exeMethodByXml(elementType ElementType, beanName string, sessionEngine Sess
 		return -1, err
 	}
 	array_arg := []interface{}{}
-	sql, err := buildSql(proxyArg, nodes, sessionEngine.SqlBuilder(), &array_arg, convert)
+	sql, pageArg, err := buildSql(proxyArg, nodes, sessionEngine.SqlBuilder(), &array_arg, convert)
 	if err != nil {
 		return -1, err
 	}
+
 	//do CRUD
 	haveLastReturnValue := returnValue != nil && (*returnValue).IsNil() == false
 	if elementType == Element_Select && haveLastReturnValue {
-		//is select and have return value
+		pageResult, isPageResult := returnValue.Interface().(page.IPageResult)
+		if pageArg != nil && isPageResult {
+			//分页查询
+			page.Assert(pageArg)
+			//1. 执行count
+			countSql := "select count(*) ROW_COUNT from (" + sql + ") _____tmp_____"
+			if sessionEngine.LogEnable() {
+				sessionEngine.Log().Println("[GoMybatis] [%v] Query ==> %v", session.Id(), countSql)
+				sessionEngine.Log().Println("[GoMybatis] [%v] Args  ==> %v", session.Id(), utils.SprintArray(array_arg))
+			}
+			countRes, countErr := session.QueryPrepare(countSql, array_arg...)
+			if sessionEngine.LogEnable() {
+				var RowsAffected = "0"
+				if countErr == nil && countRes != nil {
+					RowsAffected = strconv.Itoa(len(countRes))
+				}
+				sessionEngine.Log().Println("[GoMybatis] [%v] ReturnRows <== %v", session.Id(), RowsAffected)
+				if countErr != nil {
+					sessionEngine.Log().Println("[GoMybatis] [%v] error == %v", session.Id(), err.Error())
+				}
+			}
+			if countErr != nil {
+				return -1, countErr
+			}
+			rowCount := resolveCountRes(countRes)
+			//2. 执行 offset limit
+			querySql := sql + " limit " + strconv.Itoa(page.GetLimit(pageArg)) + " offset " + strconv.Itoa(page.GetOffset(pageArg))
+			if sessionEngine.LogEnable() {
+				sessionEngine.Log().Println("[GoMybatis] [%v] Query ==> %v", session.Id(), querySql)
+				sessionEngine.Log().Println("[GoMybatis] [%v] Args  ==> %v", session.Id(), utils.SprintArray(array_arg))
+			}
+			queryRes, queryErr := session.QueryPrepare(querySql, array_arg...)
+			if sessionEngine.LogEnable() {
+				var RowsAffected = "0"
+				if queryErr == nil && queryRes != nil {
+					RowsAffected = strconv.Itoa(len(queryRes))
+				}
+				sessionEngine.Log().Println("[GoMybatis] [%v] ReturnRows <== %v", session.Id(), RowsAffected)
+				if queryErr != nil {
+					sessionEngine.Log().Println("[GoMybatis] [%v] error == %v", session.Id(), queryErr.Error())
+				}
+			}
+			if queryErr != nil {
+				return -1, queryErr
+			}
+			//处理返回结果,解析分页返回值的 SetList 方法
+			setListMethod, argValue := resolveSetListMethod(returnValue)
+			if err := sessionEngine.SqlResultDecoder().Decode(resultMap, queryRes, argValue.Interface()); err != nil {
+				return -1, err
+			}
+			//为分页返回值字段填充值
+			pageResult.SetTotalCount(int64(rowCount))
+			pageResult.SetPageCount(int(math.Ceil(float64(rowCount) / float64(pageArg.GetPageSize()))))
+			pageResult.SetDisplayCount(len(queryRes))
+			setListMethod.Call([]reflect.Value{reflect.Indirect(argValue)})
+			return -1, nil
+		}
+
+		//非分页查询
 		if sessionEngine.LogEnable() {
 			sessionEngine.Log().Println("[GoMybatis] [%v] Query ==> %v", session.Id(), sql)
 			sessionEngine.Log().Println("[GoMybatis] [%v] Args  ==> %v", session.Id(), utils.SprintArray(array_arg))
@@ -469,6 +530,44 @@ func exeMethodByXml(elementType ElementType, beanName string, sessionEngine Sess
 	return res.LastInsertId, err
 }
 
+// 根据返回值类型, 创建 PageResult.SetList(x) 方法的第一个参数的实例, 并返回反射方法
+func resolveSetListMethod(returnValue *reflect.Value) (setListMethod reflect.Value, argValue reflect.Value) {
+	pageResultStructInstance := *returnValue
+	setListMethod = pageResultStructInstance.MethodByName("SetList")
+	if (!setListMethod.IsValid() || setListMethod.Kind() != reflect.Func) && pageResultStructInstance.Kind() == reflect.Pointer {
+		setListMethod = pageResultStructInstance.Elem().MethodByName("SetList")
+	}
+	if !setListMethod.IsValid() || setListMethod.Kind() != reflect.Func {
+		panic("Your pageResult type must have method SetList(x)")
+	}
+	setListMethodType := setListMethod.Type()
+	setListMethodArgCount := setListMethodType.NumIn()
+	if setListMethodArgCount != 1 {
+		panic("Your pageResult.SetList(x) must have only one argument")
+	}
+	setListMethodFirstArgType := setListMethodType.In(0)
+	argValue = reflect.New(setListMethodFirstArgType) //构建 PageResult.List 类型的实例
+	argValue.Elem().Set(reflect.MakeSlice(setListMethodFirstArgType, 0, 0))
+	return
+}
+
+//解析分页统计行数执行结果
+func resolveCountRes(res []map[string][]byte) int {
+	if len(res) != 1 {
+		panic("count sql returned rows is not 1")
+	}
+	mp := res[0]
+	buf, exits := mp["ROW_COUNT"]
+	if !exits {
+		panic("no column ROW_COUNT returned")
+	}
+	rowCount, err := strconv.Atoi(string(buf))
+	if err != nil {
+		panic(err)
+	}
+	return rowCount
+}
+
 func closeSession(factory *SessionFactory, session Session) {
 	if session == nil {
 		return
@@ -497,14 +596,21 @@ func findArgSession(proxyArg ProxyArg) (Session, error) {
 	return session, nil
 }
 
-func buildSql(proxyArg ProxyArg, nodes []ast.Node, sqlBuilder SqlBuilder, array_arg *[]interface{}, stmtConvert stmt.StmtIndexConvert) (string, error) {
+//解析语法树, 构建 sql
+func buildSql(proxyArg ProxyArg, nodes []ast.Node, sqlBuilder SqlBuilder, array_arg *[]interface{}, stmtConvert stmt.StmtIndexConvert) (string, page.IPageArg, error) {
 	var paramMap = make(map[string]interface{})
 	var tagArgsLen = proxyArg.TagArgsLen
 	var argsLen = proxyArg.ArgsLen //参数长度，除session参数外。
 	var customLen = 0
 	var customIndex = -1
+	var pageArg page.IPageArg
 	for argIndex, arg := range proxyArg.Args {
 		var argInterface = arg.Interface()
+		//分页参数
+		if pa, ok := argInterface.(page.IPageArg); ok {
+			pageArg = pa
+			//分页参数中可能包含其他业务参数, 需要继续解析
+		}
 		if arg.Kind() == reflect.Ptr &&
 			arg.IsNil() == false &&
 			argInterface != nil &&
@@ -552,7 +658,7 @@ func buildSql(proxyArg ProxyArg, nodes []ast.Node, sqlBuilder SqlBuilder, array_
 		}
 	}
 	result, err := sqlBuilder.BuildSql(paramMap, nodes, array_arg, stmtConvert)
-	return result, err
+	return result, pageArg, err
 }
 
 //scan params
