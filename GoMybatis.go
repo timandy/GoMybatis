@@ -608,7 +608,7 @@ func buildSql(proxyArg ProxyArg, nodes []ast.Node, sqlBuilder SqlBuilder, array_
 	var pageArg page.IPageArg
 	for argIndex, arg := range proxyArg.Args {
 		var argInterface = arg.Interface()
-		//分页参数
+		//分页参数, 要求实现 IPageArg 时接收器不能使用指针
 		if pa, ok := argInterface.(page.IPageArg); ok {
 			pageArg = pa
 			//分页参数中可能包含其他业务参数, 需要继续解析
