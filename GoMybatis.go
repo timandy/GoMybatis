@@ -550,7 +550,10 @@ func buildSql(proxyArg ProxyArg, nodes []ast.Node, sqlBuilder SqlBuilder, array_
 		if proxyArg.TagArgsLen == 1 {
 			tag = &proxyArg.TagArgs[0]
 		}
-		paramMap = scanStructArgFields(proxyArg.Args[customIndex], tag)
+		expandStructToMap := scanStructArgFields(proxyArg.Args[customIndex], tag)
+		for key, value := range expandStructToMap {
+			paramMap[key] = value
+		}
 	}
 	result, err := sqlBuilder.BuildSql(paramMap, nodes, array_arg, stmtConvert)
 	return result, err
