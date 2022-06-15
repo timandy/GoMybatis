@@ -28,7 +28,7 @@ func (it GoMybatisSqlResultDecoder) Decode(resultMap map[string]*ResultProperty,
 	if sqlResultLen == 0 {
 		return nil
 	}
-	if !isArray(resultV.Kind()) {
+	if !isArray(resultV) {
 		//single basic type
 		if sqlResultLen > 1 {
 			return utils.NewError("SqlResultDecoder", " Decode one result,but find database result size find > 1 !")
@@ -293,11 +293,13 @@ func encodeStringValue(v []byte) string {
 }
 
 // is an array or slice
-func isArray(kind reflect.Kind) bool {
-	if kind == reflect.Slice || kind == reflect.Array {
-		return true
+func isArray(val reflect.Value) bool {
+	typ := val.Type()
+	if typ.Kind() == reflect.Ptr {
+		typ = typ.Elem()
 	}
-	return false
+	kind := typ.Kind()
+	return kind == reflect.Slice || kind == reflect.Array
 }
 
 func isBasicType(tItemTypeFieldType reflect.Type) bool {
