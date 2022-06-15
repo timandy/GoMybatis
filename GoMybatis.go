@@ -425,18 +425,16 @@ func exeMethodByXml(elementType ElementType, beanName string, sessionEngine Sess
 			sessionEngine.Log().Println("[GoMybatis] [%v] Args  ==> %v", session.Id(), utils.SprintArray(array_arg))
 		}
 		res, err := session.QueryPrepare(sql, array_arg...)
-		defer func() {
-			if sessionEngine.LogEnable() {
-				var RowsAffected = "0"
-				if err == nil && res != nil {
-					RowsAffected = strconv.Itoa(len(res))
-				}
-				sessionEngine.Log().Println("[GoMybatis] [%v] ReturnRows <== %v", session.Id(), RowsAffected)
-				if err != nil {
-					sessionEngine.Log().Println("[GoMybatis] [%v] error == %v", session.Id(), err.Error())
-				}
+		if sessionEngine.LogEnable() {
+			var RowsAffected = "0"
+			if err == nil && res != nil {
+				RowsAffected = strconv.Itoa(len(res))
 			}
-		}()
+			sessionEngine.Log().Println("[GoMybatis] [%v] ReturnRows <== %v", session.Id(), RowsAffected)
+			if err != nil {
+				sessionEngine.Log().Println("[GoMybatis] [%v] error == %v", session.Id(), err.Error())
+			}
+		}
 		if err != nil {
 			return -1, err
 		}
@@ -451,18 +449,16 @@ func exeMethodByXml(elementType ElementType, beanName string, sessionEngine Sess
 		sessionEngine.Log().Println("[GoMybatis] [%v] Args ==> %v", session.Id(), utils.SprintArray(array_arg))
 	}
 	res, err := session.ExecPrepare(sql, array_arg...)
-	defer func() {
-		if sessionEngine.LogEnable() {
-			var RowsAffected = "0"
-			if err == nil && res != nil {
-				RowsAffected = strconv.FormatInt(res.RowsAffected, 10)
-			}
-			sessionEngine.Log().Println("[GoMybatis] [%v] RowsAffected <== %v", session.Id(), RowsAffected)
-			if err != nil {
-				sessionEngine.Log().Println("[GoMybatis] [%v] error == %v", session.Id(), err.Error())
-			}
+	if sessionEngine.LogEnable() {
+		var RowsAffected = "0"
+		if err == nil && res != nil {
+			RowsAffected = strconv.FormatInt(res.RowsAffected, 10)
 		}
-	}()
+		sessionEngine.Log().Println("[GoMybatis] [%v] RowsAffected <== %v", session.Id(), RowsAffected)
+		if err != nil {
+			sessionEngine.Log().Println("[GoMybatis] [%v] error == %v", session.Id(), err.Error())
+		}
+	}
 
 	if err != nil {
 		return -1, err
