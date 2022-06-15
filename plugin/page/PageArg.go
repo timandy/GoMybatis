@@ -7,10 +7,12 @@ type PageArg struct {
 	PageSize int `json:"page_size"`
 }
 
+// GetPageNum 获取第几页, 从1开始, 接收器不能使用指针
 func (p PageArg) GetPageNum() int {
 	return p.PageNum
 }
 
+// GetPageSize 获取页大小, 从1开始, 接收器不能使用指针
 func (p PageArg) GetPageSize() int {
 	return p.PageSize
 }
