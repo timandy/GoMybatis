@@ -52,7 +52,7 @@ func WriteMapperPtrByEngine(ptr interface{}, xml []byte, sessionEngine SessionEn
 //func的结构体参数无需指定args的tag，框架会自动扫描它的属性，封装为map处理掉
 //使用WriteMapper函数设置代理后即可正常使用。
 func WriteMapper(bean reflect.Value, xml []byte, sessionEngine SessionEngine) {
-	beanCheck(bean)
+	beanCheck(bean, sessionEngine)
 	var mapperTree = LoadMapperXml(xml)
 	var decodeErr = sessionEngine.TemplateDecoder().DecodeTree(mapperTree, bean.Type())
 	if decodeErr != nil {
@@ -182,7 +182,7 @@ func mapperResultMapCheck(arg map[string]map[string]*ResultProperty) {
 }
 
 //check beans
-func beanCheck(value reflect.Value) {
+func beanCheck(value reflect.Value, engine SessionEngine) {
 	var t = value.Type()
 	if t.Kind() == reflect.Ptr {
 		t = t.Elem()
@@ -201,7 +201,9 @@ func beanCheck(value reflect.Value) {
 			}
 		}
 		if argsLen > 1 && customLen > 1 {
-			panic(`[GoMybats] ` + fieldItem.Name + ` must add tag "args:"*,*..."`)
+			if engine.LogEnable() {
+				engine.Log().Println("[GoMybatis] %v has more than one struct parameters", fieldItem.Name)
+			}
 		}
 	}
 }
