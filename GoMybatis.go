@@ -120,6 +120,9 @@ func WriteMapper(bean reflect.Value, xml []byte, sessionEngine SessionEngine) {
 						returnV.Elem().Set(reflect.MakeMap(*returnType.ReturnOutType))
 					case reflect.Slice:
 						returnV.Elem().Set(reflect.MakeSlice(*returnType.ReturnOutType, 0, 0))
+					case reflect.Pointer:
+						elemType := (*returnType.ReturnOutType).Elem()
+						returnV.Elem().Set(reflect.New(elemType))
 					}
 					returnValue = &returnV
 				}
@@ -425,6 +428,9 @@ func exeMethodByXml(elementType ElementType, beanName string, sessionEngine Sess
 	haveLastReturnValue := returnValue != nil && (*returnValue).IsNil() == false
 	if elementType == Element_Select && haveLastReturnValue {
 		pageResult, isPageResult := returnValue.Interface().(page.IPageResult)
+		if !isPageResult && returnValue.Kind() == reflect.Ptr {
+			pageResult, isPageResult = returnValue.Elem().Interface().(page.IPageResult)
+		}
 		if pageArg != nil && isPageResult {
 			//分页查询
 			page.Assert(pageArg)
