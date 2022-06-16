@@ -35,12 +35,15 @@ func (it GoMybatisSqlResultDecoder) Decode(resultMap map[string]*ResultProperty,
 		}
 		// base type convert
 		if isBasicType(resultV.Type()) {
+			basicTypeName := resultV.Type().Name()
 			for _, s := range sqlResult[0] {
 				var b = strings.Builder{}
-				if resultV.Kind() == reflect.String || (resultV.Kind() == reflect.Struct) {
+				if isStringInJson(basicTypeName) || (resultV.Kind() == reflect.Struct) {
 					b.WriteString("\"")
 					b.Write(s)
 					b.WriteString("\"")
+				} else if isBoolInJson(basicTypeName) {
+					b.Write(toBoolString(s))
 				} else {
 					b.Write(s)
 				}
