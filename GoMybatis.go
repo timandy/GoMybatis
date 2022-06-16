@@ -476,15 +476,15 @@ func exeMethodByXml(elementType ElementType, beanName string, sessionEngine Sess
 				return -1, queryErr
 			}
 			//处理返回结果,解析分页返回值的 SetList 方法
-			setListMethod, argValue := resolveSetListMethod(returnValue)
-			if err := sessionEngine.SqlResultDecoder().Decode(resultMap, queryRes, argValue.Interface()); err != nil {
+			setListMethod, setListMethodArgValue := resolveSetListMethod(returnValue)
+			if err := sessionEngine.SqlResultDecoder().Decode(resultMap, queryRes, setListMethodArgValue.Interface()); err != nil {
 				return -1, err
 			}
 			//为分页返回值字段填充值
 			pageResult.SetTotalCount(int64(rowCount))
 			pageResult.SetPageCount(int(math.Ceil(float64(rowCount) / float64(pageArg.GetPageSize()))))
 			pageResult.SetDisplayCount(len(queryRes))
-			setListMethod.Call([]reflect.Value{reflect.Indirect(argValue)})
+			setListMethod.Call([]reflect.Value{reflect.Indirect(setListMethodArgValue)})
 			return -1, nil
 		}
 
@@ -539,23 +539,23 @@ func exeMethodByXml(elementType ElementType, beanName string, sessionEngine Sess
 }
 
 // 根据返回值类型, 创建 PageResult.SetList(x) 方法的第一个参数的实例, 并返回反射方法
-func resolveSetListMethod(returnValue *reflect.Value) (setListMethod reflect.Value, argValue reflect.Value) {
+func resolveSetListMethod(returnValue *reflect.Value) (setListMethod reflect.Value, setListMethodArgValue reflect.Value) {
 	pageResultStructInstance := *returnValue
 	setListMethod = pageResultStructInstance.MethodByName("SetList")
 	if (!setListMethod.IsValid() || setListMethod.Kind() != reflect.Func) && pageResultStructInstance.Kind() == reflect.Pointer {
 		setListMethod = pageResultStructInstance.Elem().MethodByName("SetList")
 	}
 	if !setListMethod.IsValid() || setListMethod.Kind() != reflect.Func {
-		panic("Your pageResult type must have method SetList(x)")
+		panic("Your pageResult type must have method SetList([]T)")
 	}
 	setListMethodType := setListMethod.Type()
 	setListMethodArgCount := setListMethodType.NumIn()
 	if setListMethodArgCount != 1 {
-		panic("Your pageResult.SetList(x) must have only one argument")
+		panic("Your SetList([]T) method of pageResult type must have only one argument")
 	}
 	setListMethodFirstArgType := setListMethodType.In(0)
-	argValue = reflect.New(setListMethodFirstArgType) //构建 PageResult.List 类型的实例
-	argValue.Elem().Set(reflect.MakeSlice(setListMethodFirstArgType, 0, 0))
+	setListMethodArgValue = reflect.New(setListMethodFirstArgType) //构建 PageResult.List 类型的实例
+	setListMethodArgValue.Elem().Set(reflect.MakeSlice(setListMethodFirstArgType, 0, 0))
 	return
 }
 
