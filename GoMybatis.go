@@ -1,7 +1,6 @@
 package GoMybatis
 
 import (
-	"bytes"
 	"log"
 	"math"
 	"reflect"
@@ -72,7 +71,7 @@ func WriteMapper(bean reflect.Value, xml []byte, sessionEngine SessionEngine) {
 		var funcName = funcField.Name
 		var returnType = returnTypeMap[funcName]
 		if returnType == nil {
-			panic("[GoMybatis] struct have no return values!")
+			returnType = returnVoid
 		}
 		//mapper
 		var mapper = methodXmlMap[funcName]
@@ -250,8 +249,8 @@ func makeReturnTypeMap(value reflect.Type) (returnMap map[string]*ReturnType) {
 		}
 
 		var numOut = funcType.NumOut()
-		if numOut > 2 || numOut == 0 {
-			panic("[GoMybatis] func '" + funcName + "()' return num out must = 1 or = 2!")
+		if numOut > 2 {
+			panic("[GoMybatis] func '" + funcName + "()' return num out must in [0-2]!")
 		}
 		for f := 0; f < numOut; f++ {
 			var outType = funcType.Out(f)
@@ -361,16 +360,6 @@ func makeMethodXmlMap(bean reflect.Value, mapperTree map[string]etree.Token, eng
 
 //方法基本规则检查
 func methodFieldCheck(beanType *reflect.Type, methodType *reflect.StructField, warning bool) {
-	if methodType.Type.NumOut() < 1 {
-		var buffer bytes.Buffer
-		buffer.WriteString("[GoMybatis] bean ")
-		buffer.WriteString((*beanType).Name())
-		buffer.WriteString(".")
-		buffer.WriteString(methodType.Name)
-		buffer.WriteString("() must be return a 'error' type!")
-		panic(buffer.String())
-	}
-
 	var args = methodType.Tag.Get("args")
 	if methodType.Type.NumOut() > 1 && args == "" && !(methodType.Name == "NewSession") {
 		if warning {
