@@ -2,10 +2,11 @@ package GoMybatis
 
 import (
 	"database/sql"
+	"sync"
+
 	"github.com/timandy/GoMybatis/v7/ast"
 	"github.com/timandy/GoMybatis/v7/engines"
 	"github.com/timandy/GoMybatis/v7/utils"
-	"sync"
 )
 
 type GoMybatisEngine struct {

@@ -1,10 +1,11 @@
 package GoMybatis
 
 import (
-	"github.com/timandy/GoMybatis/v7/example"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/timandy/GoMybatis/v7/example"
 )
 
 func TestScanStructArgFields(ff *testing.T) {

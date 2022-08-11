@@ -2,10 +2,11 @@ package GoMybatis
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
-	"github.com/timandy/GoMybatis/v7/utils"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/timandy/GoMybatis/v7/utils"
 )
 
 type TestResult struct {

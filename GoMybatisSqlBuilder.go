@@ -1,9 +1,10 @@
 package GoMybatis
 
 import (
+	"strings"
+
 	"github.com/timandy/GoMybatis/v7/ast"
 	"github.com/timandy/GoMybatis/v7/stmt"
-	"strings"
 )
 
 type GoMybatisSqlBuilder struct {

@@ -2,11 +2,12 @@ package GoMybatis
 
 import (
 	"fmt"
+	"testing"
+	"time"
+
 	"github.com/timandy/GoMybatis/v7/example"
 	"github.com/timandy/GoMybatis/v7/stmt"
 	"github.com/timandy/GoMybatis/v7/tx"
-	"testing"
-	"time"
 )
 
 type ExampleActivityMapper struct {

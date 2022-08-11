@@ -2,11 +2,12 @@ package GoMybatis
 
 import (
 	"bytes"
-	"github.com/timandy/GoMybatis/v7/lib/github.com/beevik/etree"
-	"github.com/timandy/GoMybatis/v7/utils"
 	"reflect"
 	"strconv"
 	"strings"
+
+	"github.com/timandy/GoMybatis/v7/lib/github.com/beevik/etree"
+	"github.com/timandy/GoMybatis/v7/utils"
 )
 
 var equalOperator = []string{"/", "+", "-", "*", "**", "|", "^", "&", "%", "<", ">", ">=", "<=", " in ", " not in ", " or ", "||", " and ", "&&", "==", "!="}

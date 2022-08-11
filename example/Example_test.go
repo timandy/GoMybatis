@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/timandy/GoMybatis/v7"
-	"github.com/timandy/GoMybatis/v7/ids"
 	"io/ioutil"
 	"reflect"
 	"testing"
 	"time"
+
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/timandy/GoMybatis/v7"
+	"github.com/timandy/GoMybatis/v7/ids"
 )
 
 //支持基本类型和指针(int,string,time.Time,float...且需要指定参数名称`args:"name"以逗号隔开，且位置要和实际参数相同)

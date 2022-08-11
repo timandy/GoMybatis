@@ -2,12 +2,13 @@ package GoMybatis
 
 import (
 	"fmt"
+	"testing"
+	"time"
+
 	"github.com/timandy/GoMybatis/v7/engines"
 	"github.com/timandy/GoMybatis/v7/lib/github.com/beevik/etree"
 	"github.com/timandy/GoMybatis/v7/stmt"
 	"github.com/timandy/GoMybatis/v7/utils"
-	"testing"
-	"time"
 )
 
 //压力测试 sql构建情况

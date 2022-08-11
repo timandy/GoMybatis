@@ -2,16 +2,17 @@ package GoMybatis
 
 import (
 	"bytes"
-	"github.com/timandy/GoMybatis/v7/ast"
-	"github.com/timandy/GoMybatis/v7/lib/github.com/beevik/etree"
-	"github.com/timandy/GoMybatis/v7/plugin/page"
-	"github.com/timandy/GoMybatis/v7/stmt"
-	"github.com/timandy/GoMybatis/v7/utils"
 	"log"
 	"math"
 	"reflect"
 	"strconv"
 	"strings"
+
+	"github.com/timandy/GoMybatis/v7/ast"
+	"github.com/timandy/GoMybatis/v7/lib/github.com/beevik/etree"
+	"github.com/timandy/GoMybatis/v7/plugin/page"
+	"github.com/timandy/GoMybatis/v7/stmt"
+	"github.com/timandy/GoMybatis/v7/utils"
 )
 
 const NewSessionFunc = "NewSession" //NewSession method,auto write implement body code

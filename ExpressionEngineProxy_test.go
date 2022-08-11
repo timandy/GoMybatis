@@ -2,9 +2,10 @@ package GoMybatis
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/timandy/GoMybatis/v7/engines"
 	"github.com/timandy/GoMybatis/v7/example"
-	"testing"
 )
 
 func TestExpressionEngineProxy_Eval(t *testing.T) {

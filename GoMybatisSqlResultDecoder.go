@@ -2,10 +2,11 @@ package GoMybatis
 
 import (
 	"encoding/json"
-	"github.com/timandy/GoMybatis/v7/utils"
 	"reflect"
 	"strings"
 	"unicode"
+
+	"github.com/timandy/GoMybatis/v7/utils"
 )
 
 type GoMybatisSqlResultDecoder struct {

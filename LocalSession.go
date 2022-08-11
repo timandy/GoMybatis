@@ -3,10 +3,11 @@ package GoMybatis
 import (
 	"database/sql"
 	"errors"
+	"strconv"
+
 	"github.com/timandy/GoMybatis/v7/stmt"
 	"github.com/timandy/GoMybatis/v7/tx"
 	"github.com/timandy/GoMybatis/v7/utils"
-	"strconv"
 )
 
 //本地直连session

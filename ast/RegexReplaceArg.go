@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/timandy/GoMybatis/v7/stmt"
 	"reflect"
 	"strings"
+
+	"github.com/timandy/GoMybatis/v7/stmt"
 )
 
 //执行替换操作

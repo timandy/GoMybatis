@@ -1,8 +1,9 @@
 package GoMybatis
 
 import (
-	"github.com/timandy/GoMybatis/v7/utils"
 	"sync"
+
+	"github.com/timandy/GoMybatis/v7/utils"
 )
 
 type ExpressionEngineLexerMapCache struct {

@@ -1,8 +1,9 @@
 package GoMybatis
 
 import (
-	"github.com/timandy/GoMybatis/v7/lib/github.com/beevik/etree"
 	"reflect"
+
+	"github.com/timandy/GoMybatis/v7/lib/github.com/beevik/etree"
 )
 
 type TemplateDecoder interface {

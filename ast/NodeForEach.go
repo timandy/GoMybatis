@@ -3,8 +3,9 @@ package ast
 import (
 	"bytes"
 	"errors"
-	"github.com/timandy/GoMybatis/v7/stmt"
 	"reflect"
+
+	"github.com/timandy/GoMybatis/v7/stmt"
 )
 
 //foreach 节点

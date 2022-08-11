@@ -1,8 +1,9 @@
 package engines
 
 import (
-	"github.com/timandy/GoMybatis/v7/lib/github.com/timandy/GoFastExpress"
 	"strings"
+
+	"github.com/timandy/GoMybatis/v7/lib/github.com/timandy/GoFastExpress"
 )
 
 type ExpressionEngineGoExpress struct {

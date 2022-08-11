@@ -1,8 +1,9 @@
 package engines
 
 import (
-	"github.com/timandy/GoMybatis/v7/example"
 	"testing"
+
+	"github.com/timandy/GoMybatis/v7/example"
 )
 
 func BenchmarkExpressionEngineGoExpress_Eval(b *testing.B) {
