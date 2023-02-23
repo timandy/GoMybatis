@@ -1,12 +1,13 @@
 package utils
 
 import (
-	"errors"
 	"fmt"
+
+	"github.com/timandy/routine"
 )
 
 const PackageName = "com.github.timandy.GoMybatis"
 
 func NewError(StructName string, args ...interface{}) error {
-	return errors.New(fmt.Sprint("[GoMybatis] ", PackageName, ".", StructName, ": ", args))
+	return routine.NewRuntimeErrorWithMessage(fmt.Sprint("[GoMybatis] ", PackageName, ".", StructName, ": ", args))
 }

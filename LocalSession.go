@@ -8,6 +8,7 @@ import (
 	"github.com/timandy/GoMybatis/v7/stmt"
 	"github.com/timandy/GoMybatis/v7/tx"
 	"github.com/timandy/GoMybatis/v7/utils"
+	"github.com/timandy/routine"
 )
 
 //本地直连session
@@ -455,8 +456,7 @@ func (it *LocalSession) StmtConvert() (stmt.StmtIndexConvert, error) {
 
 func (it *LocalSession) dbErrorPack(e error) error {
 	if e != nil {
-		var sqlError = errors.New("[GoMybatis][LocalSession]" + e.Error())
-		return sqlError
+		return routine.NewRuntimeErrorWithMessageCause("[GoMybatis][LocalSession]", e)
 	}
 	return nil
 }
