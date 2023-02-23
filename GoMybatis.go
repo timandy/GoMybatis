@@ -101,12 +101,8 @@ func WriteMapper(bean reflect.Value, xml []byte, sessionEngine SessionEngine) {
 					returnValue = &returnV
 				}
 				var session = sessionEngine.SessionFactory().NewSession(beanName, SessionType_Default)
-				var err error
 				returnValue.Elem().Set(reflect.ValueOf(session).Elem().Addr().Convert(*returnType.ReturnOutType))
-				if err != nil && sessionEngine.IsPanicOnError() {
-					panic(err)
-				}
-				return buildReturnValues(returnType, returnValue, err)
+				return buildReturnValues(returnType, returnValue, nil)
 			}
 			return proxyFunc
 		} else {
