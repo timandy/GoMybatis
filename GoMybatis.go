@@ -438,7 +438,7 @@ func exeMethodByXml(elementType ElementType, beanName string, sessionEngine Sess
 				}
 				sessionEngine.Log().Println("[GoMybatis] [%v] ReturnRows <== %v", session.Id(), RowsAffected)
 				if countErr != nil {
-					sessionEngine.Log().Println("[GoMybatis] [%v] error == %v", session.Id(), err.Error())
+					sessionEngine.Log().Println("[GoMybatis] [%v] error == %v", session.Id(), countErr.Error())
 				}
 			}
 			if countErr != nil {
