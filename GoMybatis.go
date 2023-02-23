@@ -393,9 +393,9 @@ func exeMethodByXml(elementType ElementType, beanName string, sessionEngine Sess
 		session = sessionEngine.GoroutineSessionMap().Get(goroutineID)
 	}
 	if session == nil {
-		s, err := sessionEngine.NewSession(beanName)
-		if err != nil {
-			return -1, err
+		s, serr := sessionEngine.NewSession(beanName)
+		if serr != nil {
+			return -1, serr
 		}
 		session = s
 		defer session.Close()
@@ -410,15 +410,15 @@ func exeMethodByXml(elementType ElementType, beanName string, sessionEngine Sess
 		return -1, err
 	}
 
-	//do CRUD
+	//==========执行查询操作
 	haveLastReturnValue := returnValue != nil && (*returnValue).IsNil() == false
 	if elementType == Element_Select && haveLastReturnValue {
 		pageResult, isPageResult := returnValue.Interface().(page.IPageResult)
 		if !isPageResult && returnValue.Kind() == reflect.Ptr {
 			pageResult, isPageResult = returnValue.Elem().Interface().(page.IPageResult)
 		}
+		//=====分页查询
 		if pageArg != nil && isPageResult {
-			//分页查询
 			page.Assert(pageArg)
 			//1. 执行count
 			countSql := "select count(*) ROW_COUNT from (" + sql + ") _____tmp_____"
@@ -433,9 +433,6 @@ func exeMethodByXml(elementType ElementType, beanName string, sessionEngine Sess
 					RowsAffected = strconv.Itoa(len(countRes))
 				}
 				sessionEngine.Log().Println("[GoMybatis] [%v] ReturnRows <== %v", session.Id(), RowsAffected)
-				if countErr != nil {
-					sessionEngine.Log().Println("[GoMybatis] [%v] error == %v", session.Id(), countErr.Error())
-				}
 			}
 			if countErr != nil {
 				return -1, countErr
@@ -454,17 +451,14 @@ func exeMethodByXml(elementType ElementType, beanName string, sessionEngine Sess
 					RowsAffected = strconv.Itoa(len(queryRes))
 				}
 				sessionEngine.Log().Println("[GoMybatis] [%v] ReturnRows <== %v", session.Id(), RowsAffected)
-				if queryErr != nil {
-					sessionEngine.Log().Println("[GoMybatis] [%v] error == %v", session.Id(), queryErr.Error())
-				}
 			}
 			if queryErr != nil {
 				return -1, queryErr
 			}
 			//处理返回结果,解析分页返回值的 SetList 方法
 			setListMethod, setListMethodArgValue := resolveSetListMethod(returnValue)
-			if err := sessionEngine.SqlResultDecoder().Decode(resultMap, queryRes, setListMethodArgValue.Interface()); err != nil {
-				return -1, err
+			if decodeErr := sessionEngine.SqlResultDecoder().Decode(resultMap, queryRes, setListMethodArgValue.Interface()); decodeErr != nil {
+				return -1, decodeErr
 			}
 			//为分页返回值字段填充值
 			pageResult.SetTotalCount(int64(rowCount))
@@ -474,54 +468,49 @@ func exeMethodByXml(elementType ElementType, beanName string, sessionEngine Sess
 			return -1, nil
 		}
 
-		//非分页查询
+		//=====普通查询
 		if sessionEngine.LogEnable() {
 			sessionEngine.Log().Println("[GoMybatis] [%v] Query ==> %v", session.Id(), sql)
 			sessionEngine.Log().Println("[GoMybatis] [%v] Args  ==> %v", session.Id(), utils.SprintArray(array_arg))
 		}
-		res, err := session.QueryPrepare(sql, array_arg...)
+		res, queryErr := session.QueryPrepare(sql, array_arg...)
 		if sessionEngine.LogEnable() {
 			var RowsAffected = "0"
-			if err == nil && res != nil {
+			if queryErr == nil && res != nil {
 				RowsAffected = strconv.Itoa(len(res))
 			}
 			sessionEngine.Log().Println("[GoMybatis] [%v] ReturnRows <== %v", session.Id(), RowsAffected)
-			if err != nil {
-				sessionEngine.Log().Println("[GoMybatis] [%v] error == %v", session.Id(), err.Error())
-			}
 		}
-		if err != nil {
-			return -1, err
+		if queryErr != nil {
+			return -1, queryErr
 		}
 
-		if err := sessionEngine.SqlResultDecoder().Decode(resultMap, res, returnValue.Interface()); err != nil {
-			return -1, err
+		if decodeErr := sessionEngine.SqlResultDecoder().Decode(resultMap, res, returnValue.Interface()); decodeErr != nil {
+			return -1, decodeErr
 		}
-		return -1, err
+		return -1, nil
 	}
+
+	//==========执行更新操作
 	if sessionEngine.LogEnable() {
 		sessionEngine.Log().Println("[GoMybatis] [%v] Exec ==> %v", session.Id(), sql)
 		sessionEngine.Log().Println("[GoMybatis] [%v] Args ==> %v", session.Id(), utils.SprintArray(array_arg))
 	}
-	res, err := session.ExecPrepare(sql, array_arg...)
+	res, updateErr := session.ExecPrepare(sql, array_arg...)
 	if sessionEngine.LogEnable() {
 		var RowsAffected = "0"
-		if err == nil && res != nil {
+		if updateErr == nil && res != nil {
 			RowsAffected = strconv.FormatInt(res.RowsAffected, 10)
 		}
 		sessionEngine.Log().Println("[GoMybatis] [%v] RowsAffected <== %v", session.Id(), RowsAffected)
-		if err != nil {
-			sessionEngine.Log().Println("[GoMybatis] [%v] error == %v", session.Id(), err.Error())
-		}
 	}
-
-	if err != nil {
-		return -1, err
+	if updateErr != nil {
+		return -1, updateErr
 	}
 	if haveLastReturnValue {
 		returnValue.Elem().SetInt(res.RowsAffected)
 	}
-	return res.LastInsertId, err
+	return res.LastInsertId, nil
 }
 
 // 根据返回值类型, 创建 PageResult.SetList(x) 方法的第一个参数的实例, 并返回反射方法
