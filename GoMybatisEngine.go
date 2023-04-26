@@ -203,6 +203,13 @@ func (it *GoMybatisEngine) Open(driverName, dataSourceLink string) (*sql.DB, err
 	return db, nil
 }
 
+//使用指定数据库驱动，初始化连接池放入路由。  sql.DB 就是连接池，可以自定义活跃连接数，具体使用参考官方文档
+//driverName: 驱动名称例如"mysql", dataSourceName: string 数据库url
+func (it *GoMybatisEngine) OpenWithDB(driverName, dataSourceLink string, db *sql.DB) {
+	it.initCheck()
+	it.dataSourceRouter.SetDB(driverName, dataSourceLink, db)
+}
+
 //模板解析器
 func (it *GoMybatisEngine) TemplateDecoder() TemplateDecoder {
 	return it.templateDecoder
