@@ -587,6 +587,7 @@ func buildSql(proxyArg ProxyArg, nodes []ast.Node, sqlBuilder SqlBuilder, array_
 	var customLen = 0
 	var customIndex = -1
 	var pageArg page.IPageArg
+	var customArg map[string]interface{}
 	for argIndex, arg := range proxyArg.Args {
 		var argInterface = arg.Interface()
 		//分页参数, 要求实现 IPageArg 时接收器不能使用指针
@@ -607,6 +608,8 @@ func buildSql(proxyArg ProxyArg, nodes []ast.Node, sqlBuilder SqlBuilder, array_
 		if isCustomStruct(arg.Type()) {
 			customLen++
 			customIndex = argIndex
+			customArg = scanStructArgFields(arg)
+			argInterface = customArg
 		}
 		if arg.Type().String() == GoMybatis_Session_Ptr ||
 			arg.Type().String() == GoMybatis_Session {
@@ -630,13 +633,11 @@ func buildSql(proxyArg ProxyArg, nodes []ast.Node, sqlBuilder SqlBuilder, array_
 		}
 	}
 	if customLen == 1 && customIndex != -1 {
-		//只有一个结构体参数，需要展开它的成员变量 加入到map
-		var tag *TagArg
-		if proxyArg.TagArgsLen == 1 {
-			tag = &proxyArg.TagArgs[0]
-		}
-		expandStructToMap := scanStructArgFields(proxyArg.Args[customIndex], tag)
-		for key, value := range expandStructToMap {
+		//只有一个结构体参数，需要展开它的成员变量加入到map
+		for key, value := range customArg {
+			if _, exists := paramMap[key]; exists {
+				continue
+			}
 			paramMap[key] = value
 		}
 	}
@@ -645,7 +646,7 @@ func buildSql(proxyArg ProxyArg, nodes []ast.Node, sqlBuilder SqlBuilder, array_
 }
 
 //scan params
-func scanStructArgFields(v reflect.Value, tag *TagArg) map[string]interface{} {
+func scanStructArgFields(v reflect.Value) map[string]interface{} {
 	var t = v.Type()
 	parameters := make(map[string]interface{})
 	if v.Kind() == reflect.Ptr {
@@ -657,45 +658,43 @@ func scanStructArgFields(v reflect.Value, tag *TagArg) map[string]interface{} {
 		t = t.Elem()
 	}
 	if t.Kind() != reflect.Struct {
-		panic(`[GoMybatis] the scanParamterBean() arg is not a struct type!,type =` + t.String())
+		panic(`[GoMybatis] the scanStructArgFields() arg is not a struct type!,type =` + t.String())
 	}
-
-	var structArg = make(map[string]interface{})
-
-	//json arg,性能较差
-	//var vptr=v.Interface()
-	//var js,_=json.Marshal(vptr)
-	//json.Unmarshal(js,&structArg)
-	//
-	//for key,value:=range structArg {
-	//	parameters[key]=value
-	//}
 
 	//reflect arg,性能较快
 	for i := 0; i < t.NumField(); i++ {
-		var typeValue = t.Field(i)
-		var field = v.Field(i)
-
-		var obj interface{}
-		if field.CanInterface() {
-			obj = field.Interface()
+		var fieldType = t.Field(i)
+		var fieldValue = v.Field(i)
+		//字段值
+		var filedObj interface{}
+		if fieldValue.CanInterface() {
+			filedObj = fieldValue.Interface()
 		}
-		var jsonKey = typeValue.Tag.Get(`json`)
+		//继承的结构体
+		var anonymousMap map[string]interface{}
+		if fieldType.Anonymous {
+			anonymousMap = scanStructArgFields(fieldValue)
+			filedObj = anonymousMap
+		}
+		//赋值 json tag
+		var jsonKey = fieldType.Tag.Get(`json`)
 		if strings.Index(jsonKey, ",") != -1 {
 			jsonKey = strings.Split(jsonKey, ",")[0]
 		}
 		if jsonKey != "" {
-			parameters[jsonKey] = obj
-			structArg[jsonKey] = obj
-			parameters[typeValue.Name] = obj
-			structArg[typeValue.Name] = obj
-		} else {
-			parameters[typeValue.Name] = obj
-			structArg[typeValue.Name] = obj
+			parameters[jsonKey] = filedObj
 		}
-	}
-	if tag != nil && parameters[tag.Name] == nil {
-		parameters[tag.Name] = structArg
+		//赋值 字段名
+		parameters[fieldType.Name] = filedObj
+		//赋值 展开匿名结构体
+		if anonymousMap != nil {
+			for subKey, subValue := range anonymousMap {
+				if _, exists := parameters[subKey]; exists {
+					continue
+				}
+				parameters[subKey] = subValue
+			}
+		}
 	}
 	return parameters
 }
