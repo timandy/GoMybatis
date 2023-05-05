@@ -8,12 +8,12 @@ import (
 	"strings"
 )
 
-//操作符
+// Operator 操作符
 type Operator = string
 
 const (
 	//一元操作符
-	Size Operator = "size"
+	Size Operator = "size()"
 
 	//计算操作符
 	Add    Operator = "+"
@@ -31,9 +31,31 @@ const (
 	More      Operator = ">"
 	MoreEqual Operator = ">="
 
+	//常量
 	Nil  Operator = "nil"
 	Null Operator = "null"
 )
+
+var (
+	ConstOperators  = []Operator{Nil, Null}
+	UnaryOperators  = []Operator{Size}
+	BinaryOperators = []Operator{Add, Reduce, Ride, Divide, And, Or, Equal, UnEqual, Less, LessEqual, More, MoreEqual}
+)
+
+//是否常量运算符
+func isConstOperator(o Operator) bool {
+	return contains(ConstOperators, o)
+}
+
+//是否一元运算符
+func isUnaryOperator(o Operator) bool {
+	return contains(UnaryOperators, o)
+}
+
+//是否二元运算符
+func isBinaryOperator(o Operator) bool {
+	return contains(BinaryOperators, o)
+}
 
 //乘除优先于加减 计算优于比较,
 var priorityArray = []Operator{Size, Ride, Divide, Add, Reduce,
@@ -123,7 +145,7 @@ func parserNode(express string, v Operator) (Node, error) {
 	if NotSupportOptMap[v] {
 		return nil, errors.New("find not support opt = '" + v + "',express=" + express)
 	}
-	if isOperatorsAction(v) {
+	if isBinaryOperator(v) {
 		var optNode = OptNode{
 			value: v,
 			t:     NOpt,
@@ -195,17 +217,13 @@ func parserNode(express string, v Operator) (Node, error) {
 	if valuesLen == 0 {
 		return nil, errors.New("no values found")
 	}
-	if valuesLen == 1 {
-		var argNode = ArgNode{
-			value:     v,
-			values:    values,
-			valuesLen: 1,
-			t:         NArg,
-		}
-		return argNode, nil
+	var argNode = ArgNode{
+		value:     v,
+		values:    values,
+		valuesLen: valuesLen,
+		t:         NArg,
 	}
-
-	return buildUnaryNode(values), nil
+	return argNode, nil
 }
 
 func trimRemoveEmptyEntries(values []string) []string {
@@ -298,6 +316,26 @@ func ParserOperators(express string) []Operator {
 		if lit == "" && tok != token.ILLEGAL {
 			lastToken = tok
 		}
+		//当前 tok 为 ')' 上一个 lit 必须是 '('
+		if tok == token.RPAREN {
+			resultLen := len(newResult)
+			if resultLen >= 2 {
+				lastLit := newResult[resultLen-1]
+				if lastLit == "(" {
+					newResult = newResult[:resultLen-1]
+					newResult[resultLen-2] = newResult[resultLen-2] + "()"
+					if index > 0 {
+						index -= 1
+					}
+					continue
+				} else {
+					panic("[express] '()' must be in pair")
+				}
+			} else {
+				panic("[express] should not start with '()'")
+			}
+		}
+		//
 		if tok == token.PERIOD || lastToken == token.PERIOD {
 			//append to last token
 			newResult[len(newResult)-1] = newResult[len(newResult)-1] + s
@@ -310,7 +348,7 @@ func ParserOperators(express string) []Operator {
 				s = "-" + s
 				index -= 1
 			} else {
-				if index > 2 && isOperatorsAction(newResult[index-2]) {
+				if index > 2 && isBinaryOperator(newResult[index-2]) {
 					newResult = newResult[:2]
 					s = "-" + s
 					index -= 1
@@ -364,23 +402,11 @@ func toStr(lit string, tok token.Token) string {
 	}
 }
 
-func isOperatorsAction(arg string) bool {
-	//计算操作符
-	if arg == Add ||
-		arg == Reduce ||
-		arg == Ride ||
-		arg == Divide ||
-		//比较操作符
-		arg == And ||
-		arg == Or ||
-		arg == Equal ||
-		arg == UnEqual ||
-		arg == Less ||
-		arg == LessEqual ||
-		arg == More ||
-		arg == MoreEqual {
-		return true
+func contains[T comparable](source []T, item T) bool {
+	for _, t := range source {
+		if t == item {
+			return true
+		}
 	}
 	return false
-
 }

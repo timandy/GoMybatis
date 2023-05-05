@@ -57,6 +57,16 @@ func getObjV(key string, operator Operator, av reflect.Value) (*reflect.Value, e
 		av = GetDeepPtr(av)
 	}
 
+	if isUnaryOperator(operator) {
+		if av.CanInterface() {
+			result, err := DoUnaryAction(key, operator, av.Interface(), av)
+			resultVal := reflect.ValueOf(result)
+			return &resultVal, err
+		} else {
+			return nil, errors.New("[express] " + key + " get value  " + key + "  fail :" + av.String() + ",value key:" + operator + " cause: can not be interface")
+		}
+	}
+
 	if av.Kind() == reflect.Map {
 		var mapV = av.MapIndex(reflect.ValueOf(operator))
 		return &mapV, nil
@@ -65,12 +75,15 @@ func getObjV(key string, operator Operator, av reflect.Value) (*reflect.Value, e
 	if av.Kind() != reflect.Struct {
 		return nil, errors.New("[express] " + key + " get value  " + key + "  fail :" + av.String() + ",value key:" + operator)
 	}
-	av = av.FieldByName(operator)
-	if av.Kind() == reflect.Ptr || av.Kind() == reflect.Interface {
-		av = GetDeepPtr(av)
+	ret := av.FieldByName(operator)
+	if !ret.IsValid() {
+		return nil, errors.New("[express] the field '" + operator + "' is not exists in type " + av.Type().String())
 	}
-	if av.IsValid() && av.CanInterface() {
-		return &av, nil
+	if ret.Kind() == reflect.Ptr || ret.Kind() == reflect.Interface {
+		ret = GetDeepPtr(ret)
+	}
+	if ret.IsValid() && ret.CanInterface() {
+		return &ret, nil
 	} else {
 		return nil, nil
 	}
@@ -273,6 +286,5 @@ func DoUnaryAction(express string, operator Operator, a interface{}, av reflect.
 			return av.Len(), nil
 		}
 	}
-
-	return "", errors.New("[express] " + express + "find not support operator :" + operator)
+	return "", errors.New("[express] " + express + "find not support operator :" + operator + " for type:" + av.Type().String())
 }
