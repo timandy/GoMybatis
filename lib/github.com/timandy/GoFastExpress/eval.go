@@ -18,7 +18,10 @@ func EvalTakes(argNode ArgNode, arg interface{}) (interface{}, error) {
 	if av.Kind() == reflect.Map {
 		var m = arg.(map[string]interface{})
 		if argNode.valuesLen == 1 {
-			return m[argNode.value], nil
+			if result, exists := m[argNode.value]; exists {
+				return result, nil
+			}
+			return nil, errors.New("[express] there is no field '" + argNode.value + "' or jsontag '" + argNode.value + "' in the input param")
 		}
 		return takeValue(argNode.value, av.MapIndex(reflect.ValueOf(argNode.values[0])), argNode.values[1:])
 	} else {
