@@ -20,7 +20,7 @@ func TestScanStructArgFields(ff *testing.T) {
 		CreateTime: time.Now(),
 		DeleteFlag: 1,
 	}
-	scanStructArgFields(reflect.ValueOf(act), nil)
+	scanStructArgFields(reflect.ValueOf(act))
 	var t = reflect.TypeOf(act)
 	for i := 0; i < t.NumField(); i++ {
 		var typeValue = t.Field(i)
@@ -44,6 +44,6 @@ func BenchmarkScanStructArgFields(b *testing.B) {
 	}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		scanStructArgFields(reflect.ValueOf(act), nil)
+		scanStructArgFields(reflect.ValueOf(act))
 	}
 }

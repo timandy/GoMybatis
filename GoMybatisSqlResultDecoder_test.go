@@ -25,6 +25,22 @@ type TestResult struct {
 	F       bool    `json:"f"`
 }
 
+type TestResultNoTag struct {
+	Name    string
+	Amount1 float32
+	Amount2 float64
+	Age1    int
+	Age2    int32
+	Age3    int64
+	Age4    uint
+	Age5    uint8
+	Age6    uint16
+	Age7    uint32
+	Age8    uint64
+	Bool    bool
+	F       bool
+}
+
 func Test_ToUpperCamelCase(t *testing.T) {
 	testToUpperCamelCase(t, "", "")
 	testToUpperCamelCase(t, "", "_")
@@ -110,8 +126,8 @@ func Test_convert_struct(t *testing.T) {
 
 	var resMap = make(map[string][]byte)
 	resMap["Name"] = []byte("xiao ming")
-	resMap["Amount_1"] = []byte("1908.1")
-	resMap["Amount_2"] = []byte("1908.444")
+	resMap["amount_1"] = []byte("1908.1")
+	resMap["amount_2"] = []byte("1908.444")
 	resMap["Age_1"] = []byte("1908")
 	resMap["Age_2"] = []byte("1908")
 	resMap["Age_3"] = []byte("1908")
@@ -123,7 +139,7 @@ func Test_convert_struct(t *testing.T) {
 	resMap["Bool"] = []byte("true")
 	res = append(res, resMap)
 
-	var result TestResult
+	var result TestResultNoTag
 	GoMybatisSqlResultDecoder.Decode(nil, res, &result)
 
 	if result.Name != string(resMap["Name"]) {
@@ -186,7 +202,7 @@ func Test_convert_html_struct(t *testing.T) {
 	resMap["Bool"] = []byte("true")
 	res = append(res, resMap)
 
-	var result TestResult
+	var result TestResultNoTag
 	GoMybatisSqlResultDecoder.Decode(nil, res, &result)
 
 	//if result.Name != string(resMap["Name"]) {

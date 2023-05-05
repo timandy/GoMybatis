@@ -11,6 +11,6 @@ func (it *LogStandard) Println(v ...interface{}) {
 	if it.PrintlnFunc != nil {
 		it.PrintlnFunc(v...)
 	} else {
-		log.Println(v)
+		log.Println(v...)
 	}
 }

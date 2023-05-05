@@ -12,7 +12,7 @@ func TestLogStandard_Println(t *testing.T) {
 	stand.Println("hello")
 
 	//设置func，使用func打印
-	stand.PrintlnFunc = func(v ...string) {
+	stand.PrintlnFunc = func(v ...interface{}) {
 		log.Println(fmt.Sprint(v))
 	}
 
