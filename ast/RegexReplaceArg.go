@@ -13,18 +13,19 @@ import (
 //执行替换操作
 func Replace(findStrs []string, data string, arg map[string]interface{}, engine ExpressionEngine, arg_array *[]interface{}, indexConvert stmt.StmtIndexConvert) (string, error) {
 	for _, findStr := range findStrs {
-
 		//find param arg
-		var argValue = arg[findStr]
+		argValue := arg[findStr]
 		if argValue == nil {
 			//exec lexer
 			var err error
-			evalData, err := engine.LexerAndEval(findStr, arg)
+			argValue, err = engine.LexerAndEval(findStr, arg) //eval expression
 			if err != nil {
 				return "", errors.New(engine.Name() + ":" + err.Error())
 			}
-			*arg_array = append(*arg_array, evalData)
-		} else if reflect.ValueOf(argValue).Kind() == reflect.Slice {
+		}
+		//proc arg value
+		if reflect.ValueOf(argValue).Kind() == reflect.Slice {
+			//expand if argValue is Slice
 			configHolder := &NodeConfigHolder{Proxy: engine}
 			childNode := &NodeString{value: "#{item}", t: NString, expressMap: []string{"item"}, holder: configHolder}
 			foreachNode := &NodeForEach{childs: []Node{childNode}, t: NForEach, collection: findStr, open: "(", separator: ",", close: ")", item: "item", holder: configHolder}
@@ -34,6 +35,7 @@ func Replace(findStrs []string, data string, arg map[string]interface{}, engine 
 			}
 			data = strings.Replace(data, "#{"+findStr+"}", string(b), -1)
 		} else {
+			//add argValue to the arg_array which will be used by db driver
 			*arg_array = append(*arg_array, argValue)
 		}
 		//replace index
