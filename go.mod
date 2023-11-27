@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/stretchr/testify v1.8.4
-	github.com/timandy/routine v1.1.1
+	github.com/timandy/routine v1.1.3
 )
 
 require (
