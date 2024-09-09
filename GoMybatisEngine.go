@@ -29,7 +29,8 @@ type GoMybatisEngine struct {
 	properties          map[string]any        //其他属性, 业务使用
 }
 
-func (it *GoMybatisEngine) New() *GoMybatisEngine {
+func NewEngine() *GoMybatisEngine {
+	it := &GoMybatisEngine{}
 	it.logEnable = true
 	it.isInit = true
 	if it.logEnable == true && it.log == nil {

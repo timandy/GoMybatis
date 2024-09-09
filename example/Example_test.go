@@ -44,7 +44,7 @@ type ExampleActivityMapper struct {
 	SelectLinks       func(column string) ([]Activity, error)                                `args:"column"`
 }
 
-var engine GoMybatis.GoMybatisEngine
+var engine *GoMybatis.GoMybatisEngine
 
 //初始化mapper文件和结构体
 var exampleActivityMapper = ExampleActivityMapper{}
@@ -68,7 +68,7 @@ func init() {
 		println("GoMybatisEngine not init! because MysqlUri is * or MysqlUri is ''")
 		return
 	}
-	engine = GoMybatis.GoMybatisEngine{}.New()
+	engine = GoMybatis.NewEngine()
 
 	//设置打印自动生成的xml 到控制台方便调试，false禁用
 	engine.TemplateDecoder().SetPrintElement(false)
@@ -442,7 +442,7 @@ func initTestService() TestService {
 			return nil
 		},
 	}
-	GoMybatis.AopProxyService(&testService, &engine)
+	GoMybatis.AopProxyService(&testService, engine)
 	return testService
 }
 
