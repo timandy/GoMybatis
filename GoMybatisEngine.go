@@ -29,7 +29,7 @@ type GoMybatisEngine struct {
 	properties          map[string]any        //其他属性, 业务使用
 }
 
-func (it GoMybatisEngine) New() GoMybatisEngine {
+func (it *GoMybatisEngine) New() *GoMybatisEngine {
 	it.logEnable = true
 	it.isInit = true
 	if it.logEnable == true && it.log == nil {
@@ -60,7 +60,7 @@ func (it GoMybatisEngine) New() GoMybatisEngine {
 	}
 
 	if it.sessionFactory == nil {
-		var factory = SessionFactory{}.New(&it)
+		var factory = SessionFactory{}.New(it)
 		it.sessionFactory = &factory
 	}
 	if it.goroutineSessionMap == nil {
@@ -72,7 +72,7 @@ func (it GoMybatisEngine) New() GoMybatisEngine {
 	return it
 }
 
-func (it GoMybatisEngine) initCheck() {
+func (it *GoMybatisEngine) initCheck() {
 	if it.isInit == false {
 		panic(utils.NewError("GoMybatisEngine", "must call GoMybatisEngine{}.New() to init!"))
 	}
@@ -257,6 +257,10 @@ func (it *GoMybatisEngine) SetWriteBackAutoField(value bool) {
 
 func (it *GoMybatisEngine) IsWriteBackAutoFiled() bool {
 	return it.writeBackAutoField
+}
+
+func (it *GoMybatisEngine) GetProperty(key string) any {
+	return it.properties[key]
 }
 
 func (it *GoMybatisEngine) SetProperty(key string, value any) {

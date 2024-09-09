@@ -112,6 +112,9 @@ type SessionEngine interface {
 	// IsWriteBackAutoFiled 获取 insert() 时是否写回自增列
 	IsWriteBackAutoFiled() bool
 
+	// GetProperty 获取属性
+	GetProperty(key string) any
+
 	// SetProperty 设置属性
 	SetProperty(key string, value any)
 
