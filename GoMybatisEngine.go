@@ -26,6 +26,7 @@ type GoMybatisEngine struct {
 	goroutineIDEnable   bool                  //是否启用goroutineIDEnable（注意（该方法需要在多协程环境下调用）启用会从栈获取协程id，有一定性能消耗，换取最大的事务定义便捷,单线程处理场景可以关闭此配置）
 	panicOnError        bool                  //执行sql失败时是否panic
 	writeBackAutoField  bool                  //执行 insert() 时是否写回自增列
+	properties          map[string]any        //其他属性, 业务使用
 }
 
 func (it GoMybatisEngine) New() GoMybatisEngine {
@@ -67,6 +68,7 @@ func (it GoMybatisEngine) New() GoMybatisEngine {
 		it.goroutineSessionMap = &gr
 	}
 	it.goroutineIDEnable = true
+	it.properties = make(map[string]any)
 	return it
 }
 
@@ -89,6 +91,7 @@ func (it *GoMybatisEngine) DataSourceRouter() DataSourceRouter {
 	it.initCheck()
 	return it.dataSourceRouter
 }
+
 func (it *GoMybatisEngine) SetDataSourceRouter(router DataSourceRouter) {
 	it.initCheck()
 	it.dataSourceRouter = router
@@ -254,4 +257,12 @@ func (it *GoMybatisEngine) SetWriteBackAutoField(value bool) {
 
 func (it *GoMybatisEngine) IsWriteBackAutoFiled() bool {
 	return it.writeBackAutoField
+}
+
+func (it *GoMybatisEngine) SetProperty(key string, value any) {
+	it.properties[key] = value
+}
+
+func (it *GoMybatisEngine) RemoveProperty(key string) {
+	delete(it.properties, key)
 }
