@@ -1,30 +1,24 @@
 package GoMybatis
 
-import (
-	"sync"
-)
+import "github.com/timandy/routine"
+
+var sessionMapTls = routine.NewThreadLocal[Session]()
 
 type GoroutineSessionMap struct {
-	m sync.Map
 }
 
-func (it GoroutineSessionMap) New() GoroutineSessionMap {
-	return GoroutineSessionMap{
-		m: sync.Map{},
-	}
-}
-func (it *GoroutineSessionMap) Put(k int64, session Session) {
-	it.m.Store(k, session)
-}
-func (it *GoroutineSessionMap) Get(k int64) Session {
-	var v, ok = it.m.Load(k)
-	if ok {
-		return v.(Session)
-	} else {
-		return nil
-	}
+func NewGoroutineSessionMap() *GoroutineSessionMap {
+	return &GoroutineSessionMap{}
 }
 
-func (it *GoroutineSessionMap) Delete(k int64) {
-	it.m.Delete(k)
+func (it *GoroutineSessionMap) Put(session Session) {
+	sessionMapTls.Set(session)
+}
+
+func (it *GoroutineSessionMap) Get() Session {
+	return sessionMapTls.Get()
+}
+
+func (it *GoroutineSessionMap) Delete() {
+	sessionMapTls.Remove()
 }

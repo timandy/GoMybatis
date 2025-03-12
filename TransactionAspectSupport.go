@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/timandy/GoMybatis/v7/tx"
-	"github.com/timandy/GoMybatis/v7/utils"
 )
 
 //使用AOP切面 代理目标服务，如果服务painc()它的事务会回滚
@@ -33,13 +32,7 @@ func AopProxyServiceValue(service reflect.Value, engine SessionEngine) {
 			propagation = tx.NewPropagation(txTag)
 		}
 		var fn = func(arg ProxyArg) []reflect.Value {
-			var goroutineID int64 //协程id
-			if engine.GoroutineIDEnable() {
-				goroutineID = utils.GoroutineID()
-			} else {
-				goroutineID = 0
-			}
-			var session = engine.GoroutineSessionMap().Get(goroutineID)
+			var session = engine.GoroutineSessionMap().Get()
 			if session == nil {
 				//todo newSession is use service bean name?
 				var err error
@@ -48,13 +41,13 @@ func AopProxyServiceValue(service reflect.Value, engine SessionEngine) {
 					if session != nil {
 						session.Close()
 					}
-					engine.GoroutineSessionMap().Delete(goroutineID)
+					engine.GoroutineSessionMap().Delete()
 				}()
 				if err != nil {
 					panic(err)
 				}
 				//压入map
-				engine.GoroutineSessionMap().Put(goroutineID, session)
+				engine.GoroutineSessionMap().Put(session)
 			}
 			if !haveTx {
 				var err = session.Begin(session.LastPROPAGATION())

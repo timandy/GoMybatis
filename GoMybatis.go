@@ -384,13 +384,7 @@ func exeMethodByXml(elementType ElementType, beanName string, sessionEngine Sess
 		return -1, err
 	}
 	if session == nil {
-		var goroutineID int64 //协程id
-		if sessionEngine.GoroutineIDEnable() {
-			goroutineID = utils.GoroutineID()
-		} else {
-			goroutineID = 0
-		}
-		session = sessionEngine.GoroutineSessionMap().Get(goroutineID)
+		session = sessionEngine.GoroutineSessionMap().Get()
 	}
 	if session == nil {
 		s, serr := sessionEngine.NewSession(beanName)

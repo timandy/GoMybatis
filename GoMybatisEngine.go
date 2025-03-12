@@ -65,8 +65,7 @@ func NewEngine() *GoMybatisEngine {
 		it.sessionFactory = &factory
 	}
 	if it.goroutineSessionMap == nil {
-		var gr = GoroutineSessionMap{}.New()
-		it.goroutineSessionMap = &gr
+		it.goroutineSessionMap = NewGoroutineSessionMap()
 	}
 	it.goroutineIDEnable = true
 	it.properties = make(map[string]any)

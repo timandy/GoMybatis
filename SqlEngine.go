@@ -89,14 +89,8 @@ type SessionEngine interface {
 	//设置模板解析器
 	SetTemplateDecoder(decoder TemplateDecoder)
 
-	//（注意（该方法需要在多协程环境下调用）启用会从栈获取协程id，有一定性能消耗，换取最大的事务定义便捷）
+	//使用 routine 读写协程上下文变量, 损耗极少
 	GoroutineSessionMap() *GoroutineSessionMap
-
-	//是否启用goroutineIDEnable（注意（该方法需要在多协程环境下调用）启用会从栈获取协程id，有一定性能消耗，换取最大的事务定义便捷）
-	SetGoroutineIDEnable(enable bool)
-
-	//是否启用goroutineIDEnable（注意（该方法需要在多协程环境下调用）启用会从栈获取协程id，有一定性能消耗，换取最大的事务定义便捷）
-	GoroutineIDEnable() bool
 
 	IsPrintWarning() bool
 
