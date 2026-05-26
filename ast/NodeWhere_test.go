@@ -10,11 +10,9 @@ func TestNodeWhere_Eval(t *testing.T) {
 		t: NWhere,
 	}
 	w.childs = []Node{&NodeString{
-		value:               "and select *",
-		t:                   NString,
-		expressMap:          []string{},
-		noConvertExpressMap: []string{},
-		holder:              &NodeConfigHolder{},
+		tokens: []Token{&RawToken{text: "and select *"}},
+		t:      NString,
+		holder: &NodeConfigHolder{},
 	}}
 
 	var s, e = w.Eval(nil, nil, nil)

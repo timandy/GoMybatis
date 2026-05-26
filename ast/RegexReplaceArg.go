@@ -2,79 +2,15 @@ package ast
 
 import (
 	"bytes"
-	"errors"
-	"fmt"
-	"reflect"
-	"strings"
-
-	"github.com/timandy/GoMybatis/v7/stmt"
 )
 
-//执行替换操作
-func Replace(findStrs []string, data string, arg map[string]interface{}, engine ExpressionEngine, arg_array *[]interface{}, indexConvert stmt.StmtIndexConvert) (string, error) {
-	for _, findStr := range findStrs {
-		//find param arg
-		argValue := arg[findStr]
-		if argValue == nil {
-			//exec lexer
-			var err error
-			argValue, err = engine.LexerAndEval(findStr, arg) //eval expression
-			if err != nil {
-				return "", errors.New(engine.Name() + ":" + err.Error())
-			}
-		}
-		//proc arg value
-		if reflect.ValueOf(argValue).Kind() == reflect.Slice {
-			//expand if argValue is Slice
-			configHolder := &NodeConfigHolder{Proxy: engine}
-			childNode := &NodeString{value: "#{item}", t: NString, expressMap: []string{"item"}, holder: configHolder}
-			foreachNode := &NodeForEach{childs: []Node{childNode}, t: NForEach, collection: findStr, open: "(", separator: ",", close: ")", item: "item", holder: configHolder}
-			b, err := foreachNode.Eval(arg, arg_array, indexConvert)
-			if err != nil {
-				return "", err
-			}
-			data = strings.Replace(data, "#{"+findStr+"}", string(b), -1)
-		} else {
-			//add argValue to the arg_array which will be used by db driver
-			*arg_array = append(*arg_array, argValue)
-		}
-		//replace index
-		indexConvert.Inc()
-		data = strings.Replace(data, "#{"+findStr+"}", indexConvert.Convert(), -1)
-	}
-	return data, nil
-}
-
-//执行替换操作
-func ReplaceRaw(findStrs []string, data string, typeConvert SqlArgTypeConvert, arg map[string]interface{}, engine ExpressionEngine) (string, error) {
-	for _, findStr := range findStrs {
-		var evalData interface{}
-		//find param arg
-		var argValue = arg[findStr]
-		if argValue != nil {
-			evalData = argValue
-		} else {
-			//exec lexer
-			var err error
-			evalData, err = engine.LexerAndEval(findStr, arg)
-			if err != nil {
-				return "", errors.New(engine.Name() + ":" + err.Error())
-			}
-		}
-		var resultStr string
-		if typeConvert != nil {
-			resultStr = typeConvert.Convert(evalData)
-		} else {
-			resultStr = fmt.Sprint(evalData)
-		}
-		data = strings.Replace(data, "${"+findStr+"}", resultStr, -1)
-	}
-	arg = nil
-	typeConvert = nil
-	return data, nil
-}
-
 //find like #{*} value *
+//
+//历史 API：返回 str 中所有 #{...} 占位符的 name（出现一次返回一项，不去重）。
+//出现 ',' 时取逗号前部分（兼容 #{name, jdbcType=...} 写法）。
+//
+//当前 NodeString 渲染已迁移到 Token 流（参见 Token.go::tokenize），
+//此函数保留作为对外暴露的字符串工具供调用方和测试使用。
 func FindExpress(str string) []string {
 	var finds = []string{}
 	var item []byte
@@ -112,6 +48,12 @@ func FindExpress(str string) []string {
 }
 
 //find like ${*} value *
+//
+//历史 API：返回 str 中所有 ${...} 占位符的 name（出现一次返回一项，不去重）。
+//出现 ',' 时取逗号前部分。
+//
+//当前 NodeString 渲染已迁移到 Token 流（参见 Token.go::tokenize），
+//此函数保留作为对外暴露的字符串工具供调用方和测试使用。
 func FindRawExpressString(str string) []string {
 	var finds = []string{}
 	var item []byte

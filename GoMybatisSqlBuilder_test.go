@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/timandy/GoMybatis/v7/engines"
 	"github.com/timandy/GoMybatis/v7/lib/github.com/beevik/etree"
 	"github.com/timandy/GoMybatis/v7/stmt"
@@ -172,6 +173,125 @@ func TestGoMybatisSqlBuilder_BuildSql(t *testing.T) {
 		t.Fatal(err)
 	}
 	fmt.Println(sql)
+}
+
+// 复现 / 回归 bug：同一个参数 #{userId} 在 UNION ALL 中出现多次时，
+// PostgreSQL/Oracle 等编号占位符方言下，旧实现会生成单一占位符却 append 多次参数。
+// Token 流重构后，每个 #{x} 出现都是一个独立的 ExprToken，渲染时各自 Inc + append，
+// 占位符与参数自然 1:1。
+func TestGoMybatisSqlBuilder_BuildSql_DuplicateParam_Mysql(t *testing.T) {
+	var mapper = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper>
+    <select id="selectByCondition">
+        select * from t1 where user_id = #{userId}
+        union all
+        select * from t2 where user_id = #{userId}
+    </select>
+</mapper>`
+	var mapperTree = LoadMapperXml([]byte(mapper))
+
+	var builder = GoMybatisSqlBuilder{}.New(ExpressionEngineProxy{}.New(&engines.ExpressionEngineGoExpress{}, true), &LogStandard{}, true)
+	var nodes = builder.nodeParser.Parser(mapperTree["selectByCondition"].(*etree.Element).Child)
+
+	var paramMap = make(map[string]interface{})
+	paramMap["userId"] = 1001
+
+	var array = []interface{}{}
+	var sql, err = builder.BuildSql(paramMap, nodes, &array, &stmt.MysqlStmtIndexConvertImpl{})
+	assert.NoError(t, err)
+	fmt.Println("sql   :", sql)
+	fmt.Println("params:", array)
+
+	assert.Equal(t, "select * from t1 where user_id = ? union all select * from t2 where user_id = ?", sql)
+	assert.Equal(t, []interface{}{1001, 1001}, array)
+}
+
+func TestGoMybatisSqlBuilder_BuildSql_DuplicateParam_Postgre(t *testing.T) {
+	var mapper = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper>
+    <select id="selectByCondition">
+        select * from t1 where user_id = #{userId}
+        union all
+        select * from t2 where user_id = #{userId}
+    </select>
+</mapper>`
+	var mapperTree = LoadMapperXml([]byte(mapper))
+
+	var builder = GoMybatisSqlBuilder{}.New(ExpressionEngineProxy{}.New(&engines.ExpressionEngineGoExpress{}, true), &LogStandard{}, true)
+	var nodes = builder.nodeParser.Parser(mapperTree["selectByCondition"].(*etree.Element).Child)
+
+	var paramMap = make(map[string]interface{})
+	paramMap["userId"] = 1001
+
+	var array = []interface{}{}
+	var sql, err = builder.BuildSql(paramMap, nodes, &array, &stmt.PostgreStmtIndexConvertImpl{})
+	assert.NoError(t, err)
+	fmt.Println("sql   :", sql)
+	fmt.Println("params:", array)
+
+	assert.Equal(t, "select * from t1 where user_id = $1 union all select * from t2 where user_id = $2", sql)
+	assert.Equal(t, []interface{}{1001, 1001}, array)
+}
+
+func TestGoMybatisSqlBuilder_BuildSql_DuplicateParam_Oracle(t *testing.T) {
+	var mapper = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper>
+    <select id="selectByCondition">
+        select * from t1 where user_id = #{userId}
+        union all
+        select * from t2 where user_id = #{userId}
+    </select>
+</mapper>`
+	var mapperTree = LoadMapperXml([]byte(mapper))
+
+	var builder = GoMybatisSqlBuilder{}.New(ExpressionEngineProxy{}.New(&engines.ExpressionEngineGoExpress{}, true), &LogStandard{}, true)
+	var nodes = builder.nodeParser.Parser(mapperTree["selectByCondition"].(*etree.Element).Child)
+
+	var paramMap = make(map[string]interface{})
+	paramMap["userId"] = 1001
+
+	var array = []interface{}{}
+	var sql, err = builder.BuildSql(paramMap, nodes, &array, &stmt.OracleStmtIndexConvertImpl{})
+	assert.NoError(t, err)
+	fmt.Println("sql   :", sql)
+	fmt.Println("params:", array)
+
+	assert.Equal(t, "select * from t1 where user_id = :val1 union all select * from t2 where user_id = :val2", sql)
+	assert.Equal(t, []interface{}{1001, 1001}, array)
+}
+
+// 回归: slice 类型参数 #{ids} 在 UNION ALL 中复用时, PG 下两个 IN 子句应分别占
+// 各自的占位符编号区段 (例如 IN ($1,$2,$3) ... IN ($4,$5,$6)),
+// 且 arg_array 长度 = 占位符总数。
+func TestGoMybatisSqlBuilder_BuildSql_DuplicateSliceParam_Postgre(t *testing.T) {
+	var mapper = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper>
+    <select id="selectByCondition">
+        select * from t1 where id in #{ids}
+        union all
+        select * from t2 where id in #{ids}
+    </select>
+</mapper>`
+	var mapperTree = LoadMapperXml([]byte(mapper))
+
+	var builder = GoMybatisSqlBuilder{}.New(ExpressionEngineProxy{}.New(&engines.ExpressionEngineGoExpress{}, true), &LogStandard{}, true)
+	var nodes = builder.nodeParser.Parser(mapperTree["selectByCondition"].(*etree.Element).Child)
+
+	var paramMap = make(map[string]interface{})
+	paramMap["ids"] = []int{10, 20, 30}
+
+	var array = []interface{}{}
+	var sql, err = builder.BuildSql(paramMap, nodes, &array, &stmt.PostgreStmtIndexConvertImpl{})
+	assert.NoError(t, err)
+	fmt.Println("sql   :", sql)
+	fmt.Println("params:", array)
+
+	assert.Equal(t, "select * from t1 where id in ( $1 , $2 , $3 ) union all select * from t2 where id in ( $4 , $5 , $6 )", sql)
+	assert.Equal(t, []interface{}{10, 20, 30, 10, 20, 30}, array)
 }
 
 //压力测试 sql构建情况
