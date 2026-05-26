@@ -11,6 +11,12 @@ import (
 )
 
 //执行替换操作
+//
+//注意: findStrs 由 FindExpress 按 #{...} 在 data 中的"每次出现"返回一项（不去重）。
+//因此每轮迭代必须只消费 data 中"一处"占位符，从而让 arg_array.append / indexConvert.Inc /
+//占位符渲染三者保持 1:1。否则在 PostgreSQL/Oracle 等使用编号占位符的方言下,
+//同名 #{x} 会被全量替换为同一个 $N (或 :valN), 而 arg_array 却被追加多次, 导致
+//"占位符数量 ≠ 参数数量"。
 func Replace(findStrs []string, data string, arg map[string]interface{}, engine ExpressionEngine, arg_array *[]interface{}, indexConvert stmt.StmtIndexConvert) (string, error) {
 	for _, findStr := range findStrs {
 		//find param arg
@@ -33,14 +39,15 @@ func Replace(findStrs []string, data string, arg map[string]interface{}, engine 
 			if err != nil {
 				return "", err
 			}
-			data = strings.Replace(data, "#{"+findStr+"}", string(b), -1)
-		} else {
-			//add argValue to the arg_array which will be used by db driver
-			*arg_array = append(*arg_array, argValue)
+			//只替换"本次出现", foreach 已自行 Inc 过, 不再走下方的 Inc/Convert
+			data = strings.Replace(data, "#{"+findStr+"}", string(b), 1)
+			continue
 		}
-		//replace index
+		//add argValue to the arg_array which will be used by db driver
+		*arg_array = append(*arg_array, argValue)
+		//replace index, 只消费"本次出现"
 		indexConvert.Inc()
-		data = strings.Replace(data, "#{"+findStr+"}", indexConvert.Convert(), -1)
+		data = strings.Replace(data, "#{"+findStr+"}", indexConvert.Convert(), 1)
 	}
 	return data, nil
 }

@@ -174,6 +174,197 @@ func TestGoMybatisSqlBuilder_BuildSql(t *testing.T) {
 	fmt.Println(sql)
 }
 
+// 复现 bug: 同一个参数 #{userId} 在 UNION ALL 中出现多次时，
+// PostgreSQL/Kingbase 占位符只生成一个 $1，但 arg_array 却追加了多次参数，
+// 导致 "占位符数量与参数数量不一致" 的错误。
+func TestGoMybatisSqlBuilder_BuildSql_DuplicateParam_Postgre(t *testing.T) {
+	var mapper = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper>
+    <select id="selectByCondition">
+        select * from t1 where user_id = #{userId}
+        union all
+        select * from t2 where user_id = #{userId}
+    </select>
+</mapper>`
+	var mapperTree = LoadMapperXml([]byte(mapper))
+
+	var builder = GoMybatisSqlBuilder{}.New(ExpressionEngineProxy{}.New(&engines.ExpressionEngineGoExpress{}, true), &LogStandard{}, true)
+	var nodes = builder.nodeParser.Parser(mapperTree["selectByCondition"].(*etree.Element).Child)
+
+	var paramMap = make(map[string]interface{})
+	paramMap["userId"] = 1001
+
+	var array = []interface{}{}
+	var sql, err = builder.BuildSql(paramMap, nodes, &array, &stmt.PostgreStmtIndexConvertImpl{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println("sql   :", sql)
+	fmt.Println("params:", array)
+
+	// PostgreSQL/Kingbase 协议中 $N 按编号取参数，因此 SQL 中"不同的"占位符数量必须等于参数数量。
+	// 这里 distinct $N 数量 与 len(array) 不匹配就说明出现了
+	// "同一个 #{xxx} 复用了同一个 $N, 但 arg_array 却被追加了多次" 的 bug。
+	var distinct = map[string]struct{}{}
+	for i := 0; i < len(sql); i++ {
+		if sql[i] != '$' {
+			continue
+		}
+		j := i + 1
+		for j < len(sql) && sql[j] >= '0' && sql[j] <= '9' {
+			j++
+		}
+		if j > i+1 {
+			distinct[sql[i:j]] = struct{}{}
+		}
+	}
+	if len(distinct) != len(array) {
+		t.Fatalf("不同占位符数(%d) 与 参数数量(%d) 不一致, sql=%q, args=%v",
+			len(distinct), len(array), sql, array)
+	}
+}
+
+// MySQL 使用位置占位符 ?，对此 bug "免疫"：
+// 第 1 轮 strings.Replace(..., -1) 把两个 #{userId} 一起替换成 " ? "，
+// 第 2 轮再次 append 参数（arg_array 长度变成 2），但 SQL 已没有 #{userId} 可换 —— no-op。
+// 最终 2 个 ? 对应 2 个参数，按位置绑定刚好正确。
+func TestGoMybatisSqlBuilder_BuildSql_DuplicateParam_Mysql(t *testing.T) {
+	var mapper = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper>
+    <select id="selectByCondition">
+        select * from t1 where user_id = #{userId}
+        union all
+        select * from t2 where user_id = #{userId}
+    </select>
+</mapper>`
+	var mapperTree = LoadMapperXml([]byte(mapper))
+
+	var builder = GoMybatisSqlBuilder{}.New(ExpressionEngineProxy{}.New(&engines.ExpressionEngineGoExpress{}, true), &LogStandard{}, true)
+	var nodes = builder.nodeParser.Parser(mapperTree["selectByCondition"].(*etree.Element).Child)
+
+	var paramMap = make(map[string]interface{})
+	paramMap["userId"] = 1001
+
+	var array = []interface{}{}
+	var sql, err = builder.BuildSql(paramMap, nodes, &array, &stmt.MysqlStmtIndexConvertImpl{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println("sql   :", sql)
+	fmt.Println("params:", array)
+
+	// MySQL 占位符按位置绑定：sql 中 ? 的数量必须等于 args 的数量
+	var placeholderCount = 0
+	for i := 0; i < len(sql); i++ {
+		if sql[i] == '?' {
+			placeholderCount++
+		}
+	}
+	if placeholderCount != len(array) {
+		t.Fatalf("? 占位符数(%d) 与 参数数量(%d) 不一致, sql=%q, args=%v",
+			placeholderCount, len(array), sql, array)
+	}
+}
+
+// Oracle 使用编号占位符 :valN，与 PostgreSQL 同样会触发本 bug：
+// 第 1 轮把两个 #{userId} 都替换成 :val1，第 2 轮才生成 :val2 但已无处可替换。
+// 最终 SQL 中只有 :val1 一种编号，但 arg_array 有 2 个值。
+func TestGoMybatisSqlBuilder_BuildSql_DuplicateParam_Oracle(t *testing.T) {
+	var mapper = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper>
+    <select id="selectByCondition">
+        select * from t1 where user_id = #{userId}
+        union all
+        select * from t2 where user_id = #{userId}
+    </select>
+</mapper>`
+	var mapperTree = LoadMapperXml([]byte(mapper))
+
+	var builder = GoMybatisSqlBuilder{}.New(ExpressionEngineProxy{}.New(&engines.ExpressionEngineGoExpress{}, true), &LogStandard{}, true)
+	var nodes = builder.nodeParser.Parser(mapperTree["selectByCondition"].(*etree.Element).Child)
+
+	var paramMap = make(map[string]interface{})
+	paramMap["userId"] = 1001
+
+	var array = []interface{}{}
+	var sql, err = builder.BuildSql(paramMap, nodes, &array, &stmt.OracleStmtIndexConvertImpl{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println("sql   :", sql)
+	fmt.Println("params:", array)
+
+	// Oracle 同 PostgreSQL：不同 :valN 编号数必须等于参数数量
+	var distinct = map[string]struct{}{}
+	for i := 0; i < len(sql); i++ {
+		if sql[i] != ':' {
+			continue
+		}
+		j := i + 1
+		for j < len(sql) && ((sql[j] >= 'a' && sql[j] <= 'z') || (sql[j] >= '0' && sql[j] <= '9')) {
+			j++
+		}
+		if j > i+1 {
+			distinct[sql[i:j]] = struct{}{}
+		}
+	}
+	if len(distinct) != len(array) {
+		t.Fatalf("不同 :valN 编号数(%d) 与 参数数量(%d) 不一致, sql=%q, args=%v",
+			len(distinct), len(array), sql, array)
+	}
+}
+
+// 回归: slice 类型参数 #{ids} 在 UNION ALL 中复用时, PG/Oracle 下两个 IN 子句应分别占
+// 各自的占位符编号区段 (例如 IN ($1,$2,$3) ... IN ($4,$5,$6)), 且 arg_array 长度 = 占位符总数。
+func TestGoMybatisSqlBuilder_BuildSql_DuplicateSliceParam_Postgre(t *testing.T) {
+	var mapper = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper>
+    <select id="selectByCondition">
+        select * from t1 where id in #{ids}
+        union all
+        select * from t2 where id in #{ids}
+    </select>
+</mapper>`
+	var mapperTree = LoadMapperXml([]byte(mapper))
+
+	var builder = GoMybatisSqlBuilder{}.New(ExpressionEngineProxy{}.New(&engines.ExpressionEngineGoExpress{}, true), &LogStandard{}, true)
+	var nodes = builder.nodeParser.Parser(mapperTree["selectByCondition"].(*etree.Element).Child)
+
+	var paramMap = make(map[string]interface{})
+	paramMap["ids"] = []int{10, 20, 30}
+
+	var array = []interface{}{}
+	var sql, err = builder.BuildSql(paramMap, nodes, &array, &stmt.PostgreStmtIndexConvertImpl{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println("sql   :", sql)
+	fmt.Println("params:", array)
+
+	// 期望 6 个不同编号占位符, 6 个参数
+	var distinct = map[string]struct{}{}
+	for i := 0; i < len(sql); i++ {
+		if sql[i] != '$' {
+			continue
+		}
+		j := i + 1
+		for j < len(sql) && sql[j] >= '0' && sql[j] <= '9' {
+			j++
+		}
+		if j > i+1 {
+			distinct[sql[i:j]] = struct{}{}
+		}
+	}
+	if len(distinct) != 6 || len(array) != 6 {
+		t.Fatalf("expect 6 distinct placeholders & 6 args, got distinct=%d args=%d, sql=%q args=%v",
+			len(distinct), len(array), sql, array)
+	}
+}
+
 //压力测试 sql构建情况
 func Benchmark_SqlBuilder_If_Element(b *testing.B) {
 	b.StopTimer()
