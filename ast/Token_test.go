@@ -271,3 +271,148 @@ func TestExprToken_ScalarReuse_Postgres(t *testing.T) {
 	assert.Equal(t, []interface{}{42}, args, "duplicate #{id} must not push another arg")
 	assert.Equal(t, 1, conv.Get(), "counter must not advance on cache hit")
 }
+
+//--- 复用语义全矩阵 ---------------------------------------------------------
+
+func TestExprToken_ScalarReuse_Oracle(t *testing.T) {
+	holder := newHolder(nil)
+	tok := &ExprToken{name: "id", holder: holder}
+	env := map[string]interface{}{"id": 42}
+	var args []interface{}
+	conv := &stmt.OracleStmtIndexConvertImpl{}
+
+	b1, err := tok.Render(env, &args, conv)
+	assert.NoError(t, err)
+	assert.Equal(t, " :val1 ", string(b1))
+
+	b2, err := tok.Render(env, &args, conv)
+	assert.NoError(t, err)
+	assert.Equal(t, " :val1 ", string(b2))
+	assert.Equal(t, []interface{}{42}, args)
+	assert.Equal(t, 1, conv.Get())
+}
+
+func TestExprToken_ScalarNoReuse_MySQL(t *testing.T) {
+	holder := newHolder(nil)
+	tok := &ExprToken{name: "id", holder: holder}
+	env := map[string]interface{}{"id": 42}
+	var args []interface{}
+	conv := &stmt.MysqlStmtIndexConvertImpl{}
+
+	// MySQL ? cannot back-reference; both renders must independently append.
+	b1, err := tok.Render(env, &args, conv)
+	assert.NoError(t, err)
+	assert.Equal(t, " ? ", string(b1))
+
+	b2, err := tok.Render(env, &args, conv)
+	assert.NoError(t, err)
+	assert.Equal(t, " ? ", string(b2))
+	assert.Equal(t, []interface{}{42, 42}, args, "MySQL must keep duplicating args")
+}
+
+func TestExprToken_SliceReuse_Postgres(t *testing.T) {
+	holder := newHolder(nil)
+	tok := &ExprToken{name: "ids", holder: holder}
+	env := map[string]interface{}{"ids": []int{1, 2, 3}}
+	var args []interface{}
+	conv := &stmt.PostgreStmtIndexConvertImpl{}
+
+	b1, err := tok.Render(env, &args, conv)
+	assert.NoError(t, err)
+	assert.Equal(t, "( $1 , $2 , $3 )", string(b1))
+	assert.Equal(t, []interface{}{1, 2, 3}, args)
+
+	b2, err := tok.Render(env, &args, conv)
+	assert.NoError(t, err)
+	assert.Equal(t, "( $1 , $2 , $3 )", string(b2), "second #{ids} must reuse the same group")
+	assert.Equal(t, []interface{}{1, 2, 3}, args, "slice reuse must not re-append")
+	assert.Equal(t, 3, conv.Get())
+}
+
+func TestExprToken_SliceReuse_Oracle(t *testing.T) {
+	holder := newHolder(nil)
+	tok := &ExprToken{name: "ids", holder: holder}
+	env := map[string]interface{}{"ids": []int{1, 2, 3}}
+	var args []interface{}
+	conv := &stmt.OracleStmtIndexConvertImpl{}
+
+	b1, err := tok.Render(env, &args, conv)
+	assert.NoError(t, err)
+	assert.Equal(t, "( :val1 , :val2 , :val3 )", string(b1))
+
+	b2, err := tok.Render(env, &args, conv)
+	assert.NoError(t, err)
+	assert.Equal(t, "( :val1 , :val2 , :val3 )", string(b2))
+	assert.Equal(t, []interface{}{1, 2, 3}, args)
+	assert.Equal(t, 3, conv.Get())
+}
+
+func TestExprToken_SliceNoReuse_MySQL(t *testing.T) {
+	holder := newHolder(nil)
+	tok := &ExprToken{name: "ids", holder: holder}
+	env := map[string]interface{}{"ids": []int{1, 2, 3}}
+	var args []interface{}
+	conv := &stmt.MysqlStmtIndexConvertImpl{}
+
+	b1, err := tok.Render(env, &args, conv)
+	assert.NoError(t, err)
+	assert.Equal(t, "( ? , ? , ? )", string(b1))
+
+	b2, err := tok.Render(env, &args, conv)
+	assert.NoError(t, err)
+	assert.Equal(t, "( ? , ? , ? )", string(b2))
+	assert.Equal(t, []interface{}{1, 2, 3, 1, 2, 3}, args,
+		"MySQL must duplicate slice args for each occurrence")
+}
+
+func TestExprToken_MixedNames_Postgres(t *testing.T) {
+	// Mirrors design doc §5: #{ids} reused, #{name} fresh; final counter advances normally.
+	holder := newHolder(nil)
+	idsTok := &ExprToken{name: "ids", holder: holder}
+	nameTok := &ExprToken{name: "name", holder: holder}
+	env := map[string]interface{}{
+		"ids":  []int{1, 2, 3},
+		"name": "foo",
+	}
+	var args []interface{}
+	conv := &stmt.PostgreStmtIndexConvertImpl{}
+
+	b1, _ := idsTok.Render(env, &args, conv)
+	assert.Equal(t, "( $1 , $2 , $3 )", string(b1))
+	b2, _ := idsTok.Render(env, &args, conv)
+	assert.Equal(t, "( $1 , $2 , $3 )", string(b2))
+	b3, _ := nameTok.Render(env, &args, conv)
+	assert.Equal(t, " $4 ", string(b3))
+
+	assert.Equal(t, []interface{}{1, 2, 3, "foo"}, args)
+	assert.Equal(t, 4, conv.Get())
+}
+
+func TestExprToken_EmptySlice_Postgres(t *testing.T) {
+	// Documented behavior: empty IN list renders as "()", produces invalid
+	// SQL on most dialects, fail-loud at the driver. No args pushed, no Inc.
+	holder := newHolder(nil)
+	tok := &ExprToken{name: "ids", holder: holder}
+	env := map[string]interface{}{"ids": []int{}}
+	var args []interface{}
+	conv := &stmt.PostgreStmtIndexConvertImpl{}
+
+	b, err := tok.Render(env, &args, conv)
+	assert.NoError(t, err)
+	assert.Equal(t, "()", string(b))
+	assert.Empty(t, args)
+	assert.Equal(t, 0, conv.Get())
+}
+
+func TestExprToken_EmptySlice_MySQL(t *testing.T) {
+	holder := newHolder(nil)
+	tok := &ExprToken{name: "ids", holder: holder}
+	env := map[string]interface{}{"ids": []int{}}
+	var args []interface{}
+	conv := &stmt.MysqlStmtIndexConvertImpl{}
+
+	b, err := tok.Render(env, &args, conv)
+	assert.NoError(t, err)
+	assert.Equal(t, "()", string(b))
+	assert.Empty(t, args)
+}
