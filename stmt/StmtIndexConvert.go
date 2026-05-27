@@ -18,6 +18,7 @@ type StmtIndexConvert interface {
 // reuse the returned string verbatim. The cache lives for one query
 // (i.e. the lifetime of the StmtIndexConvert instance).
 type StmtIndexConvertReusable interface {
+	StmtIndexConvert
 	Lookup(name string) (string, bool)
 	Register(name string, placeholder string)
 }
