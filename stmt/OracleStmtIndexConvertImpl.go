@@ -1,13 +1,10 @@
 package stmt
 
-import (
-	"fmt"
-	"sync"
-)
+import "fmt"
 
 type OracleStmtIndexConvertImpl struct {
-	sync.RWMutex
 	counter int
+	cache   map[string]string
 }
 
 func (it *OracleStmtIndexConvertImpl) Convert() string {
@@ -15,13 +12,21 @@ func (it *OracleStmtIndexConvertImpl) Convert() string {
 }
 
 func (it *OracleStmtIndexConvertImpl) Inc() {
-	it.Lock()
-	defer it.Unlock()
 	it.counter++
 }
 
 func (it *OracleStmtIndexConvertImpl) Get() int {
-	it.RLock()
-	defer it.RUnlock()
 	return it.counter
+}
+
+func (it *OracleStmtIndexConvertImpl) Lookup(name string) (string, bool) {
+	s, ok := it.cache[name]
+	return s, ok
+}
+
+func (it *OracleStmtIndexConvertImpl) Register(name string, placeholder string) {
+	if it.cache == nil {
+		it.cache = make(map[string]string, 4)
+	}
+	it.cache[name] = placeholder
 }
