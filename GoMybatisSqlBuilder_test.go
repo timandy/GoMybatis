@@ -231,8 +231,10 @@ func TestGoMybatisSqlBuilder_BuildSql_DuplicateParam_Postgre(t *testing.T) {
 	fmt.Println("sql   :", sql)
 	fmt.Println("params:", array)
 
-	assert.Equal(t, "select * from t1 where user_id = $1 union all select * from t2 where user_id = $2", sql)
-	assert.Equal(t, []interface{}{1001, 1001}, array)
+	// Postgres supports back-reference: duplicate #{userId} reuses the
+	// same $1, so arg_array carries one value.
+	assert.Equal(t, "select * from t1 where user_id = $1 union all select * from t2 where user_id = $1", sql)
+	assert.Equal(t, []interface{}{1001}, array)
 }
 
 func TestGoMybatisSqlBuilder_BuildSql_DuplicateParam_Oracle(t *testing.T) {
@@ -259,13 +261,13 @@ func TestGoMybatisSqlBuilder_BuildSql_DuplicateParam_Oracle(t *testing.T) {
 	fmt.Println("sql   :", sql)
 	fmt.Println("params:", array)
 
-	assert.Equal(t, "select * from t1 where user_id = :val1 union all select * from t2 where user_id = :val2", sql)
-	assert.Equal(t, []interface{}{1001, 1001}, array)
+	// Oracle bind-by-name: duplicate #{userId} reuses :val1.
+	assert.Equal(t, "select * from t1 where user_id = :val1 union all select * from t2 where user_id = :val1", sql)
+	assert.Equal(t, []interface{}{1001}, array)
 }
 
-// 回归: slice 类型参数 #{ids} 在 UNION ALL 中复用时, PG 下两个 IN 子句应分别占
-// 各自的占位符编号区段 (例如 IN ($1,$2,$3) ... IN ($4,$5,$6)),
-// 且 arg_array 长度 = 占位符总数。
+// 回归: slice 类型参数 #{ids} 在 UNION ALL 中复用时, PG 下两次 IN 应共享同一组
+// 占位符 ($1,$2,$3), arg_array 只承载一份元素。
 func TestGoMybatisSqlBuilder_BuildSql_DuplicateSliceParam_Postgre(t *testing.T) {
 	var mapper = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
@@ -290,8 +292,8 @@ func TestGoMybatisSqlBuilder_BuildSql_DuplicateSliceParam_Postgre(t *testing.T) 
 	fmt.Println("sql   :", sql)
 	fmt.Println("params:", array)
 
-	assert.Equal(t, "select * from t1 where id in ( $1 , $2 , $3 ) union all select * from t2 where id in ( $4 , $5 , $6 )", sql)
-	assert.Equal(t, []interface{}{10, 20, 30, 10, 20, 30}, array)
+	assert.Equal(t, "select * from t1 where id in ( $1 , $2 , $3 ) union all select * from t2 where id in ( $1 , $2 , $3 )", sql)
+	assert.Equal(t, []interface{}{10, 20, 30}, array)
 }
 
 //压力测试 sql构建情况
