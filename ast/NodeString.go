@@ -1,16 +1,15 @@
 package ast
 
-import "github.com/timandy/GoMybatis/v7/stmt"
+import (
+	"bytes"
 
-//字符串节点
+	"github.com/timandy/GoMybatis/v7/stmt"
+)
+
+//字符串节点：解析期被切分为 token 流，运行期按序渲染。
 type NodeString struct {
-	value string
-	t     NodeType
-
-	//args
-	expressMap          []string //去重的，需要替换的express 例如 map[ #{} ]interface
-	noConvertExpressMap []string //去重的，需要替换的express 例如 map[ ${} ]interface
-
+	tokens []Token
+	t      NodeType
 	holder *NodeConfigHolder
 }
 
@@ -19,22 +18,18 @@ func (it *NodeString) Type() NodeType {
 }
 
 func (it *NodeString) Eval(env map[string]interface{}, arg_array *[]interface{}, stmtConvert stmt.StmtIndexConvert) ([]byte, error) {
-	if it.holder == nil {
+	if len(it.tokens) == 0 {
 		return nil, nil
 	}
-	var data = it.value
-	var err error
-	if it.expressMap != nil {
-		data, err = Replace(it.expressMap, data, env, it.holder.GetExpressionEngineProxy(), arg_array, stmtConvert)
+	var buf bytes.Buffer
+	for _, tok := range it.tokens {
+		b, err := tok.Render(env, arg_array, stmtConvert)
 		if err != nil {
 			return nil, err
 		}
-	}
-	if it.noConvertExpressMap != nil {
-		data, err = ReplaceRaw(it.noConvertExpressMap, data, nil, env, it.holder.GetExpressionEngineProxy())
-		if err != nil {
-			return nil, err
+		if b != nil {
+			buf.Write(b)
 		}
 	}
-	return []byte(data), nil
+	return buf.Bytes(), nil
 }

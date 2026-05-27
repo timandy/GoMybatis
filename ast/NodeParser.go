@@ -34,14 +34,9 @@ func (it NodeParser) Parser(mapperXml []etree.Token) []Node {
 			str = strings.Trim(str, " ")
 			str = " " + str
 			n := NodeString{
-				value:               str,
-				t:                   NString,
-				expressMap:          FindExpress(charData.Data), //表达式需要替换的string
-				noConvertExpressMap: FindRawExpressString(charData.Data),
-				holder:              &it.Holder,
-			}
-			if len(n.expressMap) == 0 {
-				n.expressMap = nil
+				tokens: tokenize(str, &it.Holder),
+				t:      NString,
+				holder: &it.Holder,
 			}
 			node = &n
 		} else if typeString == "*etree.Element" {
