@@ -250,3 +250,24 @@ func TestNodeString_Eval_Composite(t *testing.T) {
 	assert.Equal(t, "x= ? ", string(b))
 	assert.Equal(t, []interface{}{7}, arr)
 }
+
+func TestExprToken_ScalarReuse_Postgres(t *testing.T) {
+	holder := newHolder(nil)
+	tok := &ExprToken{name: "id", holder: holder}
+	env := map[string]interface{}{"id": 42}
+	var args []interface{}
+	conv := &stmt.PostgreStmtIndexConvertImpl{}
+
+	// 1st render: misses cache → appends, increments, returns " $1 "
+	b1, err := tok.Render(env, &args, conv)
+	assert.NoError(t, err)
+	assert.Equal(t, " $1 ", string(b1))
+	assert.Equal(t, []interface{}{42}, args)
+
+	// 2nd render of the SAME name: hits cache → no append, no Inc
+	b2, err := tok.Render(env, &args, conv)
+	assert.NoError(t, err)
+	assert.Equal(t, " $1 ", string(b2))
+	assert.Equal(t, []interface{}{42}, args, "duplicate #{id} must not push another arg")
+	assert.Equal(t, 1, conv.Get(), "counter must not advance on cache hit")
+}

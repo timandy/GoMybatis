@@ -37,6 +37,13 @@ type ExprToken struct {
 }
 
 func (t *ExprToken) Render(env map[string]interface{}, arg_array *[]interface{}, stmtConvert stmt.StmtIndexConvert) ([]byte, error) {
+	reusable, _ := stmtConvert.(stmt.StmtIndexConvertReusable)
+	if reusable != nil {
+		if cached, ok := reusable.Lookup(t.name); ok {
+			return []byte(cached), nil
+		}
+	}
+
 	engine := t.holder.GetExpressionEngineProxy()
 	argValue := env[t.name]
 	if argValue == nil {
@@ -46,6 +53,8 @@ func (t *ExprToken) Render(env map[string]interface{}, arg_array *[]interface{},
 			return nil, errors.New(engine.Name() + ":" + err.Error())
 		}
 	}
+
+	var rendered []byte
 	v := reflect.ValueOf(argValue)
 	if v.Kind() == reflect.Slice {
 		//与旧版 NodeForEach 借用展开 ( elem1 , elem2 , elem3 ) 的形态保持等价
@@ -60,11 +69,17 @@ func (t *ExprToken) Render(env map[string]interface{}, arg_array *[]interface{},
 			buf.WriteString(stmtConvert.Convert())
 		}
 		buf.WriteByte(')')
-		return buf.Bytes(), nil
+		rendered = buf.Bytes()
+	} else {
+		*arg_array = append(*arg_array, argValue)
+		stmtConvert.Inc()
+		rendered = []byte(stmtConvert.Convert())
 	}
-	*arg_array = append(*arg_array, argValue)
-	stmtConvert.Inc()
-	return []byte(stmtConvert.Convert()), nil
+
+	if reusable != nil {
+		reusable.Register(t.name, string(rendered))
+	}
+	return rendered, nil
 }
 
 //RawExprToken 对应 ${name}：把 env[name] 的字符串形式直接拼到 SQL，不走参数绑定。
