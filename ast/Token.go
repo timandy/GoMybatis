@@ -40,7 +40,7 @@ func (t *ExprToken) Render(env map[string]interface{}, arg_array *[]interface{},
 	reusable, _ := stmtConvert.(stmt.StmtIndexConvertReusable)
 	if reusable != nil {
 		if cached, ok := reusable.Lookup(t.name); ok {
-			return []byte(cached), nil
+			return cached, nil
 		}
 	}
 
@@ -77,7 +77,7 @@ func (t *ExprToken) Render(env map[string]interface{}, arg_array *[]interface{},
 	}
 
 	if reusable != nil {
-		reusable.Register(t.name, string(rendered))
+		reusable.Register(t.name, rendered)
 	}
 	return rendered, nil
 }

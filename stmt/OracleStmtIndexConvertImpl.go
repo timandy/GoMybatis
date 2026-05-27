@@ -6,7 +6,7 @@ var _ StmtIndexConvertReusable = (*OracleStmtIndexConvertImpl)(nil)
 
 type OracleStmtIndexConvertImpl struct {
 	counter int
-	cache   map[string]string
+	cache   map[string][]byte
 }
 
 func (it *OracleStmtIndexConvertImpl) Convert() string {
@@ -21,14 +21,14 @@ func (it *OracleStmtIndexConvertImpl) Get() int {
 	return it.counter
 }
 
-func (it *OracleStmtIndexConvertImpl) Lookup(name string) (string, bool) {
-	s, ok := it.cache[name]
-	return s, ok
+func (it *OracleStmtIndexConvertImpl) Lookup(name string) ([]byte, bool) {
+	b, ok := it.cache[name]
+	return b, ok
 }
 
-func (it *OracleStmtIndexConvertImpl) Register(name string, placeholder string) {
+func (it *OracleStmtIndexConvertImpl) Register(name string, placeholder []byte) {
 	if it.cache == nil {
-		it.cache = make(map[string]string, 4)
+		it.cache = make(map[string][]byte, 4)
 	}
 	it.cache[name] = placeholder
 }

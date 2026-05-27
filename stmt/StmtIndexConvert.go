@@ -15,10 +15,13 @@ type StmtIndexConvert interface {
 // Oracle :valN). When a StmtIndexConvert also satisfies this
 // interface, callers may consult Lookup before rendering a new
 // placeholder; on a cache hit they MUST skip arg append / Inc and
-// reuse the returned string verbatim. The cache lives for one query
+// reuse the returned bytes verbatim. The cache lives for one query
 // (i.e. the lifetime of the StmtIndexConvert instance).
+//
+// placeholder bytes returned by Lookup are owned by the cache and
+// MUST NOT be mutated by the caller.
 type StmtIndexConvertReusable interface {
 	StmtIndexConvert
-	Lookup(name string) (string, bool)
-	Register(name string, placeholder string)
+	Lookup(name string) ([]byte, bool)
+	Register(name string, placeholder []byte)
 }

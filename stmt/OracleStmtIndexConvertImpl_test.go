@@ -12,16 +12,16 @@ func TestOracleStmtIndexConvertImpl_Convert(t *testing.T) {
 
 func TestOracleStmtIndexConvertImpl_LookupMiss(t *testing.T) {
 	var c = &OracleStmtIndexConvertImpl{}
-	if s, ok := c.Lookup("any"); ok || s != "" {
-		t.Fatalf("expected miss on empty cache, got %q ok=%v", s, ok)
+	if b, ok := c.Lookup("any"); ok || b != nil {
+		t.Fatalf("expected miss on empty cache, got %q ok=%v", b, ok)
 	}
 }
 
 func TestOracleStmtIndexConvertImpl_RegisterThenLookup(t *testing.T) {
 	var c = &OracleStmtIndexConvertImpl{}
-	c.Register("id", " :val1 ")
-	if s, ok := c.Lookup("id"); !ok || s != " :val1 " {
-		t.Fatalf("expected hit returning \" :val1 \", got %q ok=%v", s, ok)
+	c.Register("id", []byte(" :val1 "))
+	if b, ok := c.Lookup("id"); !ok || string(b) != " :val1 " {
+		t.Fatalf("expected hit returning \" :val1 \", got %q ok=%v", b, ok)
 	}
 }
 

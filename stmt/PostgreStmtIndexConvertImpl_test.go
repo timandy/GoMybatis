@@ -13,16 +13,16 @@ func TestPostgreStmtIndexConvertImpl_Convert(t *testing.T) {
 
 func TestPostgreStmtIndexConvertImpl_LookupMiss(t *testing.T) {
 	var c = &PostgreStmtIndexConvertImpl{}
-	if s, ok := c.Lookup("any"); ok || s != "" {
-		t.Fatalf("expected miss on empty cache, got %q ok=%v", s, ok)
+	if b, ok := c.Lookup("any"); ok || b != nil {
+		t.Fatalf("expected miss on empty cache, got %q ok=%v", b, ok)
 	}
 }
 
 func TestPostgreStmtIndexConvertImpl_RegisterThenLookup(t *testing.T) {
 	var c = &PostgreStmtIndexConvertImpl{}
-	c.Register("id", " $1 ")
-	if s, ok := c.Lookup("id"); !ok || s != " $1 " {
-		t.Fatalf("expected hit returning \" $1 \", got %q ok=%v", s, ok)
+	c.Register("id", []byte(" $1 "))
+	if b, ok := c.Lookup("id"); !ok || string(b) != " $1 " {
+		t.Fatalf("expected hit returning \" $1 \", got %q ok=%v", b, ok)
 	}
 }
 
