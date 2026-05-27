@@ -2,6 +2,8 @@ package stmt
 
 import "fmt"
 
+var _ StmtIndexConvertReusable = (*PostgreStmtIndexConvertImpl)(nil)
+
 type PostgreStmtIndexConvertImpl struct {
 	counter int
 	cache   map[string]string

@@ -1,5 +1,7 @@
 package stmt
 
+var _ StmtIndexConvert = (*MysqlStmtIndexConvertImpl)(nil)
+
 type MysqlStmtIndexConvertImpl struct {
 }
 

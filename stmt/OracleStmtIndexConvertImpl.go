@@ -2,6 +2,8 @@ package stmt
 
 import "fmt"
 
+var _ StmtIndexConvertReusable = (*OracleStmtIndexConvertImpl)(nil)
+
 type OracleStmtIndexConvertImpl struct {
 	counter int
 	cache   map[string]string
