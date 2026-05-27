@@ -10,7 +10,7 @@ func BuildStmtConvert(driverType string) (StmtIndexConvert, error) {
 	switch driverType {
 	case "mysql", "mymysql", "mssql", "sqlite3":
 		return &MysqlStmtIndexConvertImpl{}, nil
-	case "postgres":
+	case "postgres", "kingbase":
 		return &PostgreStmtIndexConvertImpl{
 			sync.RWMutex{},
 			0,
@@ -19,6 +19,6 @@ func BuildStmtConvert(driverType string) (StmtIndexConvert, error) {
 		return &OracleStmtIndexConvertImpl{sync.RWMutex{},
 			0}, nil
 	default:
-		panic(fmt.Sprint("[GoMybatis] un support dbName:", driverType, " only support: ", "mysql,", "mymysql,", "mssql,", "sqlite3,", "postgres,", "oci8"))
+		panic(fmt.Sprint("[GoMybatis] un support dbName:", driverType, " only support: ", "mysql,", "mymysql,", "mssql,", "sqlite3,", "postgres,", "kingbase,", "oci8"))
 	}
 }
