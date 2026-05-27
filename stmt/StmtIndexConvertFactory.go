@@ -11,10 +11,7 @@ func BuildStmtConvert(driverType string) (StmtIndexConvert, error) {
 	case "mysql", "mymysql", "mssql", "sqlite3":
 		return &MysqlStmtIndexConvertImpl{}, nil
 	case "postgres", "kingbase":
-		return &PostgreStmtIndexConvertImpl{
-			sync.RWMutex{},
-			0,
-		}, nil
+		return &PostgreStmtIndexConvertImpl{}, nil
 	case "oci8":
 		return &OracleStmtIndexConvertImpl{sync.RWMutex{},
 			0}, nil
